@@ -1,7 +1,7 @@
 import { BabelTranspiler } from './transpiler';
 import { createTranspilerPlugin, createConfigurablePlugin } from './plugin';
 
-// Exportar todo lo necesario
+// Export everything needed
 export {
   BabelTranspiler,
   createTranspilerPlugin,
@@ -10,7 +10,7 @@ export {
 
 export * from './types';
 
-// Función de utilidad principal
+// Main utility function
 export function transformCode(
   code: string,
   config: { debug?: boolean; transforms?: string[] } = {}

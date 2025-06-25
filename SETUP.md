@@ -1,42 +1,42 @@
 # Babel Transpiler - Setup Instructions
 
-## 1. Crear proyecto
+## 1. Create project
 ```bash
 mkdir babel-transpiler && cd babel-transpiler
 ```
 
-## 2. Instalar dependencias
+## 2. Install dependencies
 ```bash
 npm init -y
 npm install --save-dev @babel/core @babel/types @types/node typescript ts-node
 npm install @babel/core
 ```
 
-## 3. Estructura de archivos
-Crear la siguiente estructura:
+## 3. File structure
+Create the following structure:
 ```
 babel-transpiler/
-├── package.json          # (copiar del artifact)
-├── tsconfig.json         # (copiar del artifact)
+├── package.json          # (copy from artifact)
+├── tsconfig.json         # (copy from artifact)
 └── src/
-    ├── types.ts          # (copiar del artifact)
-    ├── plugin.ts         # (copiar del artifact)
-    ├── transpiler.ts     # (copiar del artifact)
-    ├── index.ts          # (copiar del artifact)
-    └── test.ts           # (copiar del artifact)
+    ├── types.ts          # (copy from artifact)
+    ├── plugin.ts         # (copy from artifact)
+    ├── transpiler.ts     # (copy from artifact)
+    ├── index.ts          # (copy from artifact)
+    └── test.ts           # (copy from artifact)
 ```
 
-## 4. Ejecutar
+## 4. Run
 ```bash
-npm run dev        # Ejecutar con ts-node
-npm run build      # Compilar a JavaScript
-npm run test       # Ejecutar tests
+npm run dev        # Run with ts-node
+npm run build      # Compile to JavaScript
+npm run test       # Run tests
 npm run watch      # Watch mode
 ```
 
-## 5. Empezar a desarrollar
-- Los visitors están en `src/plugin.ts`
-- La lógica principal en `src/transpiler.ts`
-- Los tests en `src/test.ts`
+## 5. Start developing
+- Visitors are in `src/plugin.ts`
+- Main logic in `src/transpiler.ts`
+- Tests in `src/test.ts`
 
-¡Listo para implementar tus transformaciones! 🚀
+Ready to implement your transformations! 🚀

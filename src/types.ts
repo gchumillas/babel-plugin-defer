@@ -12,7 +12,7 @@ export interface PluginOptions {
 
 export type BabelPlugin = (api: any, options: PluginOptions) => PluginObj;
 
-// Tipos para visitors más comunes
+// Types for common visitors
 export type BinaryExpressionVisitor = (path: NodePath<t.BinaryExpression>) => void;
 export type FunctionDeclarationVisitor = (path: NodePath<t.FunctionDeclaration>) => void;
 export type CallExpressionVisitor = (path: NodePath<t.CallExpression>) => void;

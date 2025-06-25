@@ -15,7 +15,7 @@ export class BabelTranspiler {
   }
   
   /**
-   * Transpilar código JavaScript/TypeScript
+   * Transpile JavaScript/TypeScript code
    */
   transform(code: string, isTypeScript = false): string {
     try {
@@ -50,7 +50,7 @@ export class BabelTranspiler {
   }
   
   /**
-   * Analizar código sin transformar
+   * Analyze code without transforming
    */
   analyze(code: string): void {
     console.log('🔍 Analyzing code...\n');
@@ -64,10 +64,10 @@ export class BabelTranspiler {
   }
   
   /**
-   * Transformar archivo
+   * Transform file
    */
   transformFile(filePath: string): Promise<string> {
-    // TODO: Implementar lectura de archivos
+    // TODO: Implement file reading
     return Promise.resolve('');
   }
 }

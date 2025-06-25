@@ -4,18 +4,18 @@ import * as t from '@babel/types';
 import type { PluginOptions, TranspilerConfig } from './types';
 
 /**
- * Plugin principal del transpilador
+ * Main transpiler plugin
  */
 export function createTranspilerPlugin(): PluginObj {
   return {
     name: 'custom-transpiler',
     visitor: {
-      // Visitor para expresiones binarias (==, !=, etc.)
+      // Visitor for binary expressions (==, !=, etc.)
       BinaryExpression(path: NodePath<t.BinaryExpression>) {
         const { node } = path;
         
-        // Aquí implementarás tus transformaciones
-        // Ejemplo: transformar == a ===
+        // Here you will implement your transformations
+        // Example: transform == to ===
         if (node.operator === '==') {
           node.operator = '===';
           this.log && console.log('✅ Transformed: == → ===');
@@ -27,37 +27,37 @@ export function createTranspilerPlugin(): PluginObj {
         }
       },
       
-      // Visitor para llamadas a funciones
+      // Visitor for function calls
       CallExpression(path: NodePath<t.CallExpression>) {
         const { node } = path;
         
-        // Aquí implementarás el defer() y otras funciones especiales
+        // Here you will implement defer() and other special functions
         if (t.isIdentifier(node.callee) && node.callee.name === 'defer') {
           this.log && console.log('🔍 Found defer() call');
-          // TODO: Implementar transformación defer
+          // TODO: Implement defer transformation
         }
       },
       
-      // Visitor para declaraciones de funciones
+      // Visitor for function declarations
       FunctionDeclaration(path: NodePath<t.FunctionDeclaration>) {
         const name = path.node.id?.name || 'anonymous';
         this.log && console.log(`🔍 Found function: ${name}`);
         
-        // Aquí manejarás el scope para defer calls
+        // Here you will handle scope for defer calls
       },
       
-      // Visitor para declaraciones de variables
+      // Visitor for variable declarations
       VariableDeclaration(path: NodePath<t.VariableDeclaration>) {
         const { node } = path;
         
-        // Ejemplo: transformar var/const a let
+        // Example: transform var/const to let
         if (node.kind === 'var' || node.kind === 'const') {
           // node.kind = 'let';
           // this.log && console.log(`🔄 ${node.kind} → let`);
         }
       },
       
-      // Visitor para imports
+      // Visitor for imports
       ImportDeclaration(path: NodePath<t.ImportDeclaration>) {
         const source = path.node.source.value;
         this.log && console.log(`📦 Import: ${source}`);
@@ -67,7 +67,7 @@ export function createTranspilerPlugin(): PluginObj {
 }
 
 /**
- * Plugin configurable con opciones
+ * Configurable plugin with options
  */
 export function createConfigurablePlugin(options: PluginOptions = {}): PluginObj {
   const config: TranspilerConfig = {
@@ -80,7 +80,7 @@ export function createConfigurablePlugin(options: PluginOptions = {}): PluginObj
     name: 'configurable-transpiler',
     visitor: {
       BinaryExpression(path: NodePath<t.BinaryExpression>) {
-        // Solo transformar si está en la config
+        // Only transform if it's in the config
         if (config.transforms?.includes('equality')) {
           const { node } = path;
           
