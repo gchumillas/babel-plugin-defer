@@ -10,9 +10,9 @@
     "watch": "tsc --watch",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "format": "prettier --write src/**/*.ts",
-    "format:check": "prettier --check src/**/*.ts",
-    "check": "npm run lint && npm run format:check",
+    "format": "eslint src/**/*.ts --fix",
+    "format:check": "eslint src/**/*.ts",
+    "check": "npm run lint",
     "precommit": "npm run check && npm run build"
   },
   "devDependencies": {
@@ -26,9 +26,6 @@
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
     "eslint": "^9.29.0",
-    "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-prettier": "^5.5.1",
-    "prettier": "^3.6.1",
     "ts-node": "^10.9.0",
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.35.0"
