@@ -1,5 +1,9 @@
 # GitHub Copilot Instructions
 
+## Development Guidelines
+
+**Language Requirement**: This project must be developed entirely in English.
+
 ## ESLint Rules - Quick Reference
 
 **MUST follow these patterns:**
