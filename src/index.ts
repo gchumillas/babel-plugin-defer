@@ -9,7 +9,7 @@ export * from './types'
 // Main utility function
 export function transformCode(
   code: string,
-  config: { debug?: boolean; transforms?: string[] } = {}
+  config: { debug?: boolean, transforms?: string[] } = {}
 ): string {
   const transpiler = new BabelTranspiler(config)
   return transpiler.transform(code)
