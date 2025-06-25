@@ -57,25 +57,6 @@ export default [
     },
   },
   {
-    files: ['**/types.ts'],
-    rules: {
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@stylistic/semi': ['error', 'never'],
-      '@stylistic/member-delimiter-style': ['error', {
-        multiline: {
-          delimiter: 'none',
-          requireLast: false
-        },
-        singleline: {
-          delimiter: 'comma',
-          requireLast: false
-        }
-      }]
-    }
-  },
-  {
     files: ['**/*.js'],
     languageOptions: {
       ecmaVersion: 2020,
