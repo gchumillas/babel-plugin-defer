@@ -68,9 +68,6 @@ temp/
 # Optional eslint cache
 .eslintcache
 
-# Prettier cache
-.prettiercache
-
 # Microbundle cache
 .rpt2_cache/
 .rts2_cache_cjs/
