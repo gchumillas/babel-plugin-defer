@@ -1,5 +1,7 @@
 # GitHub Copilot Instructions
 
+All instructions added to this document should be short and concise for optimal AI processing.
+
 ## Development Guidelines
 
 **Language Requirement**: This project must be developed entirely in English.
