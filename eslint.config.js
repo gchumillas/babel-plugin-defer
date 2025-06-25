@@ -55,10 +55,11 @@ module.exports = [
   },
   {
     ignores: [
-      'node_modules/**',
-      'dist/**',
-      '*.js.map',
-      'coverage/**'
+      // Ignore everything
+      '*',
+      // But don't ignore src directory
+      '!src/',
+      '!src/**'
     ],
   }
 ];
