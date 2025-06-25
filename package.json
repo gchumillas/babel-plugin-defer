@@ -1,0 +1,24 @@
+{
+  "name": "babel-defer",
+  "version": "1.0.0",
+  "description": "Babel defer transpiler",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "ts-node src/test.ts",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/types": "^7.23.0",
+    "@types/babel__core": "^7.20.5",
+    "@types/babel__traverse": "^7.20.7",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@babel/core": "^7.23.0"
+  }
+}
