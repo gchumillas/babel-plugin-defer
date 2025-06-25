@@ -1,16 +1,16 @@
-import { transform } from '@babel/core';
-import { createTranspilerPlugin, createConfigurablePlugin } from './plugin';
-import type { TranspilerConfig } from './types';
+import { transform } from '@babel/core'
+import { createTranspilerPlugin, createConfigurablePlugin } from './plugin'
+import type { TranspilerConfig } from './types'
 
 export class BabelTranspiler {
-  private config: TranspilerConfig;
+  private config: TranspilerConfig
 
   constructor(config: TranspilerConfig = {}) {
     this.config = {
       debug: false,
       transforms: [],
       ...config
-    };
+    }
   }
 
   /**
@@ -38,12 +38,12 @@ export class BabelTranspiler {
           retainLines: false,
           compact: false
         }
-      });
+      })
 
-      return result?.code || code;
+      return result?.code || code
     } catch (error) {
-      console.error('❌ Transpilation error:', error);
-      return code;
+      console.error('❌ Transpilation error:', error)
+      return code
     }
   }
 
@@ -51,14 +51,14 @@ export class BabelTranspiler {
    * Analyze code without transforming
    */
   analyze(code: string): void {
-    console.log('🔍 Analyzing code...\n');
+    console.log('🔍 Analyzing code...\n')
 
-    const oldDebug = this.config.debug;
-    this.config.debug = true;
+    const oldDebug = this.config.debug
+    this.config.debug = true
 
-    this.transform(code);
+    this.transform(code)
 
-    this.config.debug = oldDebug;
+    this.config.debug = oldDebug
   }
 
   /**
@@ -66,6 +66,6 @@ export class BabelTranspiler {
    */
   transformFile(_filePath: string): Promise<string> {
     // TODO: Implement file reading
-    return Promise.resolve('');
+    return Promise.resolve('')
   }
 }

@@ -1,5 +1,5 @@
-import type { PluginObj, NodePath } from '@babel/core';
-import type * as t from '@babel/types';
+import type { PluginObj, NodePath } from '@babel/core'
+import type * as t from '@babel/types'
 
 export interface TranspilerConfig {
   debug?: boolean;
