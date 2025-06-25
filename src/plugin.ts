@@ -31,6 +31,39 @@ export function createTranspilerPlugin(): PluginObj {
       CallExpression(path: NodePath<t.CallExpression>) {
         const { node } = path
 
+        // Transform println(text) to console.log(`${text}\n`)
+        if (t.isIdentifier(node.callee) && node.callee.name === 'println') {
+          this.log && console.log('🔍 Found println() call')
+
+          // Create console.log member expression
+          const consoleLog = t.memberExpression(
+            t.identifier('console'),
+            t.identifier('log')
+          )
+
+          // Transform the first argument to template literal with \n
+          if (node.arguments.length > 0) {
+            const arg = node.arguments[0]
+
+            // Create template literal: `${arg}\n`
+            const templateLiteral = t.templateLiteral(
+              [
+                t.templateElement({ raw: '', cooked: '' }, false),
+                t.templateElement({ raw: '\\n', cooked: '\n' }, true),
+              ],
+              [arg as t.Expression]
+            )
+
+            // Replace the call expression
+            path.replaceWith(t.callExpression(consoleLog, [templateLiteral]))
+
+            this.log &&
+              console.log(
+                '✅ Transformed: println() → console.log(`${...}\\n`)'
+              )
+          }
+        }
+
         // Here you will implement defer() and other special functions
         if (t.isIdentifier(node.callee) && node.callee.name === 'defer') {
           this.log && console.log('🔍 Found defer() call')
@@ -61,8 +94,8 @@ export function createTranspilerPlugin(): PluginObj {
       ImportDeclaration(path: NodePath<t.ImportDeclaration>) {
         const source = path.node.source.value
         this.log && console.log(`📦 Import: ${source}`)
-      }
-    }
+      },
+    },
   }
 }
 
@@ -75,7 +108,7 @@ export function createConfigurablePlugin(
   const config: TranspilerConfig = {
     debug: false,
     transforms: [],
-    ...options.config
+    ...options.config,
   }
 
   return {
@@ -90,7 +123,7 @@ export function createConfigurablePlugin(
             console.log('🔄 Equality transform enabled')
           }
         }
-      }
-    }
+      },
+    },
   }
 }
