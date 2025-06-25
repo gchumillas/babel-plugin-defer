@@ -2,7 +2,7 @@ const typescript = require('@rollup/plugin-typescript')
 const dts = require('rollup-plugin-dts')
 
 module.exports = [
-  // Build JavaScript (CommonJS and ESM)
+  // Build main plugin (CommonJS and ESM)
   {
     input: 'src/index.ts',
     output: [
@@ -22,13 +22,38 @@ module.exports = [
         tsconfig: './tsconfig.json',
         declaration: false,
         sourceMap: true,
-        module: 'esnext' // Force ES modules
+        module: 'esnext'
       })
     ],
     external: [
       '@babel/core',
       '@babel/types', 
       '@babel/traverse'
+    ]
+  },
+
+  // Build runtime-only bundle (for browser)
+  {
+    input: 'src/runtime.ts',
+    output: [
+      {
+        file: 'dist/runtime.js',
+        format: 'cjs',
+        sourcemap: true
+      },
+      {
+        file: 'dist/runtime.mjs',
+        format: 'es',
+        sourcemap: true
+      }
+    ],
+    plugins: [
+      typescript({
+        tsconfig: './tsconfig.json',
+        declaration: false,
+        sourceMap: true,
+        module: 'esnext'
+      })
     ]
   },
   
@@ -45,5 +70,15 @@ module.exports = [
       '@babel/types',
       '@babel/traverse'
     ]
+  },
+
+  // Build runtime TypeScript declarations
+  {
+    input: 'src/runtime.ts',
+    output: {
+      file: 'dist/runtime.d.ts',
+      format: 'es'
+    },
+    plugins: [dts.default()]
   }
 ]

@@ -6,6 +6,9 @@ export { BabelTranspiler, createTranspilerPlugin, createConfigurablePlugin }
 
 export * from './types'
 
+// Re-export runtime functions for convenience
+export { println } from './runtime'
+
 // Main utility function
 export function transformCode(
   code: string,

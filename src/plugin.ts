@@ -10,6 +10,11 @@ export function createTranspilerPlugin(): PluginObj {
   return {
     name: 'custom-transpiler',
     visitor: {
+      // Add a program visitor to log when the plugin runs
+      Program(_path: NodePath<t.Program>) {
+        console.log('🚀 Babel plugin is running on file!')
+      },
+
       // Visitor for binary expressions (==, !=, etc.)
       BinaryExpression(path: NodePath<t.BinaryExpression>) {
         const { node } = path
@@ -33,7 +38,7 @@ export function createTranspilerPlugin(): PluginObj {
 
         // Transform println(text) to console.log(`${text}\n`)
         if (t.isIdentifier(node.callee) && node.callee.name === 'println') {
-          this.log && console.log('🔍 Found println() call')
+          console.log('🔍 FOUND println() call - TRANSFORMING!')
 
           // Create console.log member expression
           const consoleLog = t.memberExpression(
@@ -56,11 +61,7 @@ export function createTranspilerPlugin(): PluginObj {
 
             // Replace the call expression
             path.replaceWith(t.callExpression(consoleLog, [templateLiteral]))
-
-            this.log &&
-              console.log(
-                '✅ Transformed: println() → console.log(`${...}\\n`)'
-              )
+            console.log('✅ TRANSFORMED: println() → console.log(`${...}\\n`)')
           }
         }
 
