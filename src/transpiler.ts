@@ -42,13 +42,15 @@ export class BabelTranspiler {
 
       return result?.code || code
     } catch (error) {
-      console.error('❌ Transpilation error:', error)
-      return code
+      if (this.config.debug) {
+        console.error('❌ Transpilation error:', error)
+      }
+      throw error // Re-throw the error for tests to catch
     }
   }
 
   /**
-   * Analyze code without transforming
+   * Analyze code without transforming it
    */
   analyze(code: string): void {
     console.log('🔍 Analyzing code...\n')
@@ -62,10 +64,10 @@ export class BabelTranspiler {
   }
 
   /**
-   * Transform file
+   * Transform file (future implementation)
    */
   transformFile(_filePath: string): Promise<string> {
-    // TODO: Implement file reading
+    // TODO: Implement file reading and transformation
     return Promise.resolve('')
   }
 }

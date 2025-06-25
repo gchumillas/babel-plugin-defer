@@ -14,7 +14,7 @@ export function createTranspilerPlugin(): PluginObj {
       BinaryExpression(path: NodePath<t.BinaryExpression>) {
         const { node } = path
 
-        // Here you will implement your transformations
+        // Transform loose equality to strict equality
         // Example: transform == to ===
         if (node.operator === '==') {
           node.operator = '==='
@@ -64,7 +64,7 @@ export function createTranspilerPlugin(): PluginObj {
           }
         }
 
-        // Here you will implement defer() and other special functions
+        // Detect defer() calls for future implementation
         if (t.isIdentifier(node.callee) && node.callee.name === 'defer') {
           this.log && console.log('🔍 Found defer() call')
           // TODO: Implement defer transformation
@@ -76,14 +76,14 @@ export function createTranspilerPlugin(): PluginObj {
         const name = path.node.id?.name || 'anonymous'
         this.log && console.log(`🔍 Found function: ${name}`)
 
-        // Here you will handle scope for defer calls
+        // Handle scope tracking for defer calls
       },
 
       // Visitor for variable declarations
       VariableDeclaration(path: NodePath<t.VariableDeclaration>) {
         const { node } = path
 
-        // Example: transform var/const to let
+        // Example: transform var/const to let (currently disabled)
         if (node.kind === 'var' || node.kind === 'const') {
           // node.kind = 'let';
           // this.log && console.log(`🔄 ${node.kind} → let`);
@@ -115,7 +115,7 @@ export function createConfigurablePlugin(
     name: 'configurable-transpiler',
     visitor: {
       BinaryExpression(path: NodePath<t.BinaryExpression>) {
-        // Only transform if it's in the config
+        // Only transform if enabled in configuration
         if (config.transforms?.includes('equality')) {
           const { node } = path
 
