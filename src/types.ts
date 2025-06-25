@@ -23,3 +23,6 @@ export type CallExpressionVisitor = (_path: NodePath<t.CallExpression>) => void
 export type VariableDeclarationVisitor = (
   _path: NodePath<t.VariableDeclaration>
 ) => void
+
+// Runtime function types
+export declare function println(_value: unknown): void

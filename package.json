@@ -3,8 +3,22 @@
   "version": "1.0.0",
   "description": "Babel defer transpiler",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/"
+  ],
   "scripts": {
-    "build": "node esbuild.config.js",
+    "build": "npm run build:js && npm run build:types",
+    "build:js": "node esbuild.config.js",
+    "build:types": "tsc --emitDeclarationOnly",
     "build:tsc": "tsc",
     "dev": "ts-node src/index.ts",
     "test": "jest",
