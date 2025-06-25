@@ -16,9 +16,11 @@
     "dist/"
   ],
   "scripts": {
-    "build": "npm run build:js && npm run build:types",
+    "clean": "node scripts/clean.js",
+    "build": "npm run clean && npm run build:js && npm run build:types && npm run bundle:types",
     "build:js": "node esbuild.config.js",
-    "build:types": "tsc --emitDeclarationOnly",
+    "build:types": "tsc --project tsconfig.build.json",
+    "bundle:types": "node scripts/bundle-types.js",
     "build:tsc": "tsc",
     "dev": "ts-node src/index.ts",
     "test": "jest",
