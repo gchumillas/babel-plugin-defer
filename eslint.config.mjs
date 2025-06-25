@@ -1,16 +1,19 @@
-const js = require('@eslint/js');
+import js from '@eslint/js';
+import typescriptEslint from '@typescript-eslint/eslint-plugin';
+import typescriptParser from '@typescript-eslint/parser';
+import stylistic from '@stylistic/eslint-plugin';
 
-module.exports = [
+export default [
   js.configs.recommended,
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
-      parser: require('@typescript-eslint/parser'),
+      parser: typescriptParser,
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: 'module',
         project: true,
-        tsconfigRootDir: __dirname
+        tsconfigRootDir: import.meta.dirname
       },
       globals: {
         console: 'readonly',
@@ -21,12 +24,26 @@ module.exports = [
       }
     },
     plugins: {
-      '@typescript-eslint': require('@typescript-eslint/eslint-plugin')
+      '@typescript-eslint': typescriptEslint,
+      '@stylistic': stylistic
     },
     rules: {
       // TypeScript specific rules
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
+      
+      // Stylistic rules for TypeScript
+      '@stylistic/semi': ['error', 'never'],
+      '@stylistic/member-delimiter-style': ['error', {
+        multiline: {
+          delimiter: 'none',
+          requireLast: false
+        },
+        singleline: {
+          delimiter: 'comma',
+          requireLast: false
+        }
+      }],
       
       // General rules
       'no-console': 'off',
@@ -34,7 +51,7 @@ module.exports = [
       'no-var': 'error',
       'eqeqeq': ['error', 'always'],
       'curly': ['error', 'all'],
-      'semi': ['error', 'never'],
+      'semi': 'off', // Disabled in favor of @stylistic/semi
       'quotes': ['error', 'single', { avoidEscape: true }],
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
     },
@@ -44,7 +61,18 @@ module.exports = [
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'off'
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@stylistic/semi': ['error', 'never'],
+      '@stylistic/member-delimiter-style': ['error', {
+        multiline: {
+          delimiter: 'none',
+          requireLast: false
+        },
+        singleline: {
+          delimiter: 'comma',
+          requireLast: false
+        }
+      }]
     }
   },
   {
