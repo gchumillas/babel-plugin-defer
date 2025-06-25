@@ -7,16 +7,30 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "test": "ts-node src/test.ts",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "format:check": "prettier --check src/**/*.ts",
+    "check": "npm run lint && npm run format:check",
+    "precommit": "npm run check && npm run build"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
     "@babel/types": "^7.23.0",
+    "@eslint/eslintrc": "^3.3.1",
     "@types/babel__core": "^7.20.5",
     "@types/babel__traverse": "^7.20.7",
     "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint": "^9.29.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.1",
+    "prettier": "^3.6.1",
     "ts-node": "^10.9.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.35.0"
   },
   "dependencies": {
     "@babel/core": "^7.23.0"

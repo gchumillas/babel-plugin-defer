@@ -2,11 +2,7 @@ import { BabelTranspiler } from './transpiler';
 import { createTranspilerPlugin, createConfigurablePlugin } from './plugin';
 
 // Export everything needed
-export {
-  BabelTranspiler,
-  createTranspilerPlugin,
-  createConfigurablePlugin
-};
+export { BabelTranspiler, createTranspilerPlugin, createConfigurablePlugin };
 
 export * from './types';
 
