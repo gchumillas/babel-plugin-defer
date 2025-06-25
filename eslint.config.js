@@ -34,7 +34,7 @@ module.exports = [
       'no-var': 'error',
       'eqeqeq': ['error', 'always'],
       'curly': ['error', 'all'],
-      'semi': ['error', 'always'],
+      'semi': ['error', 'never'],
       'quotes': ['error', 'single', { avoidEscape: true }],
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
     },
