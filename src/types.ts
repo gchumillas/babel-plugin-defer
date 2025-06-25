@@ -1,4 +1,4 @@
-import type { PluginObj, NodePath } from '@babel/core'
+import type { PluginObj, NodePath, PluginPass } from '@babel/core'
 import type * as t from '@babel/types'
 
 export interface TranspilerConfig {
@@ -10,7 +10,7 @@ export interface PluginOptions {
   config?: TranspilerConfig
 }
 
-export type BabelPlugin = (_api: any, _options: PluginOptions) => PluginObj
+export type BabelPlugin = (_api: PluginPass, _options: PluginOptions) => PluginObj
 
 // Types for common visitors
 export type BinaryExpressionVisitor = (
