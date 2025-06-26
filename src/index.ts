@@ -1,19 +1,7 @@
-import { BabelTranspiler } from './transpiler'
-import { createTranspilerPlugin, createConfigurablePlugin } from './plugin'
+import { createTranspilerPlugin } from './plugin'
 
-// Export everything needed
-export { BabelTranspiler, createTranspilerPlugin, createConfigurablePlugin }
+// Export the Babel plugin as default (for Babel configuration)
+export default createTranspilerPlugin
 
-export * from './types'
-
-// Re-export runtime functions for convenience
+// Export runtime functions (the main user-facing API)
 export { println } from './runtime'
-
-// Main utility function
-export function transformCode(
-  code: string,
-  config: { debug?: boolean, transforms?: string[] } = {}
-): string {
-  const transpiler = new BabelTranspiler(config)
-  return transpiler.transform(code)
-}

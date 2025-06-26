@@ -10,11 +10,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    },
-    "./runtime": {
-      "types": "./dist/runtime.d.ts",
-      "import": "./dist/runtime.mjs",
-      "require": "./dist/runtime.js"
     }
   },
   "files": [
@@ -58,7 +53,8 @@
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.35.0"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@babel/core": "^7.23.0"
-  }
+  },
+  "dependencies": {}
 }
