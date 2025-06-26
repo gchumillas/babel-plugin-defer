@@ -1,7 +1,32 @@
 {
   "name": "babel-plugin-defer",
   "version": "1.0.0",
-  "description": "Babel plugin that transpiles defer statements to JavaScript",
+  "description": "Babel plugin that transpiles defer statements to JavaScript, bringing Go-like defer functionality to JavaScript/TypeScript applications",
+  "keywords": [
+    "babel",
+    "babel-plugin",
+    "defer",
+    "transpiler",
+    "javascript",
+    "typescript",
+    "go",
+    "cleanup",
+    "resource-management"
+  ],
+  "homepage": "https://github.com/your-username/babel-plugin-defer#readme",
+  "bugs": {
+    "url": "https://github.com/your-username/babel-plugin-defer/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/babel-plugin-defer.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "url": "https://your-website.com"
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -17,8 +42,17 @@
       "require": "./dist/runtime.js"
     }
   },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
-    "dist/"
+    "dist/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "clean": "node scripts/clean.js",
@@ -34,7 +68,8 @@
     "format": "eslint src/**/*.ts --fix",
     "format:check": "eslint src/**/*.ts",
     "check": "npm run lint",
-    "precommit": "npm run check && npm run build"
+    "precommit": "npm run check && npm run build",
+    "prepublishOnly": "npm run check && npm run build && npm test"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
@@ -61,5 +96,9 @@
   "peerDependencies": {
     "@babel/core": "^7.23.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/your-username"
+  }
 }

@@ -1,5 +1,9 @@
 # babel-plugin-defer
 
+[![npm version](https://badge.fury.io/js/babel-plugin-defer.svg)](https://badge.fury.io/js/babel-plugin-defer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
 A Babel plugin that transpiles `defer` statements to JavaScript, bringing Go-like defer functionality to JavaScript/TypeScript applications.
 
 ## Overview
@@ -190,6 +194,10 @@ The plugin includes full TypeScript support with global type declarations. The `
 ## Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/your-username/babel-plugin-defer.git
+cd babel-plugin-defer
+
 # Install dependencies
 npm install
 
@@ -201,12 +209,30 @@ npm test
 
 # Run with watch mode
 npm run test:watch
+
+# Lint code
+npm run lint
+
+# Prepare for publishing
+npm run prepublishOnly
 ```
-
-## License
-
-MIT
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+MIT © [Your Name](https://your-website.com)
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for a detailed history of changes.
+
+## Support
+
+If this package is helpful to you, please consider:
+- ⭐ Starring the repository
+- 🐛 Reporting issues
+- 💡 Suggesting new features
+- 🔗 Sharing with others
