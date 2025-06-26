@@ -102,6 +102,20 @@ export default defineConfig({
 npm install --save-dev @babel/core
 ```
 
+### 4. Configure TypeScript (for global types)
+
+Add the plugin types to your `tsconfig.json` or `tsconfig.app.json`:
+
+```json
+{
+  "compilerOptions": {
+    "types": ["babel-plugin-defer"]
+  }
+}
+```
+
+This ensures TypeScript recognizes the global `defer` function without requiring imports.
+
 ## Usage
 
 ### Option 1: Global function (Recommended)
