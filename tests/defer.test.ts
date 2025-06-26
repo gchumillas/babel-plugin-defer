@@ -97,7 +97,12 @@ function normal() {
     console.log(x);
     return x;
 }`
-    const expected = ``
+    const expected = `
+function normal() {
+    const x = 1;
+    console.log(x);
+    return x;
+}`
     
     const output = transformWithPlugin(input)
     expect(normalize(output)).toBe(normalize(expected))
