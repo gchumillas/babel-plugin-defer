@@ -102,52 +102,39 @@ export default defineConfig({
 npm install --save-dev @babel/core
 ```
 
-### 4. Configure TypeScript (for global types)
-
-Add the plugin types to your `tsconfig.json` or `tsconfig.app.json`:
-
-```json
-{
-  "compilerOptions": {
-    "types": ["babel-plugin-defer"]
-  }
-}
-```
-
-This ensures TypeScript recognizes the global `defer` function without requiring imports.
-
 ## Usage
 
-### Option 1: Global function (Recommended)
+### Import the functions explicitly
 
-The `defer` function is available globally once the plugin is configured. No imports needed:
-
-```typescript
-function example() {
-  const resource = acquireResource()
-  defer(() => resource.cleanup())
-  
-  // Your code here...
-  // cleanup() will be called automatically when function exits
-}
-```
-
-### Option 2: Explicit import
-
-You can also import the function explicitly if preferred:
+Import the functions you need from the runtime package:
 
 ```typescript
 import { defer } from 'babel-plugin-defer/runtime'
 
 function example() {
   const resource = acquireResource()
-  defer(() => resource.cleanup())
+  defer(() => resource.cleanup()) // Will be transpiled to try/finally
   
   // Your code here...
+  // cleanup() will be called automatically when function exits
 }
 ```
 
-> **Note:** When using the Babel plugin, `defer` calls are transpiled at build time. The runtime import serves as a fallback for environments where Babel is not configured.
+### Multiple functions available
+
+```typescript
+import { defer, println } from 'babel-plugin-defer/runtime'
+
+function handleRequest() {
+  const startTime = Date.now()
+  defer(() => console.log(`Request took ${Date.now() - startTime}ms`))
+  
+  println('Processing request...')
+  // Handle request...
+}
+```
+
+> **Note:** When using the Babel plugin, these function calls are transpiled at build time into optimized JavaScript code. The runtime functions serve as fallbacks for environments where Babel is not configured.
 
 ## How it works
 

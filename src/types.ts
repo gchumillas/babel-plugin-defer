@@ -23,12 +23,3 @@ export type CallExpressionVisitor = (_path: NodePath<t.CallExpression>) => void
 export type VariableDeclarationVisitor = (
   _path: NodePath<t.VariableDeclaration>
 ) => void
-
-// Global type declarations for babel-defer
-declare global {
-  /**
-   * Print a value to console with newline
-   * This function is transpiled by babel-defer plugin to console.log()
-   */
-  function println(_value: unknown): void
-}
