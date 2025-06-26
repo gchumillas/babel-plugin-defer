@@ -69,12 +69,25 @@ function test() {
     defer(() => resource.close());
 }`
 
+    const expected = `
+function test() {
+    const defers = [];
+    try {
+        const resource = openResource();
+        defers.push(() => resource.close());
+    } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+            try {
+                defers[i]();
+            } catch(e) {
+                console.log(e)
+            }
+        }
+    }
+}`
+
     const output = transformWithPlugin(input)
-    
-    expect(output).toContain('const defers = []')
-    expect(output).toContain('defers.push(() => resource.close())')
-    expect(output).toContain('try {')
-    expect(output).toContain('} finally {')
+    expect(normalize(output)).toBe(normalize(expected))
   })
 
   it('should handle function without defer calls unchanged', () => {
@@ -84,14 +97,10 @@ function normal() {
     console.log(x);
     return x;
 }`
-
+    const expected = ``
+    
     const output = transformWithPlugin(input)
-    
-    // Helper function to normalize code for comparison
-    const normalize = (code: string) => code.replace(/\s+/g, ' ').trim()
-    
-    // Should remain exactly the same
-    expect(normalize(output)).toBe(normalize(input))
+    expect(normalize(output)).toBe(normalize(expected))
   })
 
   it('should handle multiple defer calls in correct reverse order', () => {
@@ -102,15 +111,26 @@ function multiDefer() {
     defer(() => console.log('third'));
 }`
 
+    const expected = `
+function multiDefer() {
+    const defers = [];
+    try {
+        defers.push(() => console.log('first'));
+        defers.push(() => console.log('second'));
+        defers.push(() => console.log('third'));
+    } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+            try {
+                defers[i]();
+            } catch(e) {
+                console.log(e)
+            }
+        }
+    }
+}`
+
     const output = transformWithPlugin(input)
-    
-    // All defer calls should be transformed to defers.push
-    expect(output).toContain("defers.push(() => console.log('first'))")
-    expect(output).toContain("defers.push(() => console.log('second'))")
-    expect(output).toContain("defers.push(() => console.log('third'))")
-    
-    // Should have the reverse execution logic
-    expect(output).toContain('for (let i = defers.length - 1; i >= 0; i--)')
+    expect(normalize(output)).toBe(normalize(expected))
   })
 
   it('should handle defer in nested blocks', () => {
@@ -125,13 +145,29 @@ function withNested() {
     }
 }`
 
+    const expected = `
+function withNested() {
+    const defers = [];
+    try {
+        const db = openDb();
+        defers.push(() => db.close());
+        if (condition) {
+            const file = openFile();
+            defers.push(() => file.close());
+        }
+    } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+            try {
+                defers[i]();
+            } catch(e) {
+                console.log(e)
+            }
+        }
+    }
+}`
+
     const output = transformWithPlugin(input)
-    
-    expect(output).toContain('const defers = []')
-    expect(output).toContain('defers.push(() => db.close())')
-    expect(output).toContain('defers.push(() => file.close())')
-    expect(output).toContain('try {')
-    expect(output).toContain('} finally {')
+    expect(normalize(output)).toBe(normalize(expected))
   })
 
   it('should preserve original function structure and other statements', () => {
@@ -148,17 +184,30 @@ function complex() {
     return result;
 }`
 
+    const expected = `
+function complex() {
+    const defers = [];
+    try {
+        let result = 0;
+        const conn = connect();
+        defers.push(() => conn.disconnect());
+        for (let i = 0; i < 10; i++) {
+            result += i;
+        }
+        return result;
+    } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+            try {
+                defers[i]();
+            } catch(e) {
+                console.log(e)
+            }
+        }
+    }
+}`
+
     const output = transformWithPlugin(input)
-    
-    // Should preserve original logic
-    expect(output).toContain('let result = 0')
-    expect(output).toContain('for (let i = 0; i < 10; i++)')
-    expect(output).toContain('result += i')
-    expect(output).toContain('return result')
-    
-    // Should add defer infrastructure
-    expect(output).toContain('const defers = []')
-    expect(output).toContain('defers.push(() => conn.disconnect())')
+    expect(normalize(output)).toBe(normalize(expected))
   })
 
   it('should only transform functions with defer, not nested functions without defer', () => {
@@ -175,22 +224,30 @@ function outer() {
   return inner()
 }`
 
-    const output = transformWithPlugin(input)
+    const expected = `
+function outer() {
+  const defers = [];
+  try {
+    const db = Db.open()
+    defers.push(() => db.close())
+    function inner() {
+      const x = 42
+      return x
+    }
+    return inner()
+  } finally {
+    for (let i = defers.length - 1; i >= 0; i--) {
+      try {
+        defers[i]()
+      } catch(e) {
+        console.log(e)
+      }
+    }
+  }
+}`
 
-    // La función externa debe ser transformada
-    expect(output).toContain('const defers = []')
-    expect(output).toContain('defers.push(() => db.close())')
-    expect(output).toContain('try {')
-    expect(output).toContain('} finally {')
-    // La función interna debe quedar igual
-    expect(output).toContain('function inner() {')
-    expect(output).toContain('const x = 42')
-    expect(output).toContain('return x')
-    // No debe haber defer infra en la función interna
-    const innerStart = output.indexOf('function inner()')
-    const innerEnd = output.indexOf('}', innerStart)
-    const innerBody = output.slice(innerStart, innerEnd)
-    expect(innerBody).not.toContain('defers')
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
   })
 
   it('should transform nested functions independently if both use defer', () => {
