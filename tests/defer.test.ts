@@ -1,5 +1,7 @@
 import { transform } from '@babel/core'
 import { createTranspilerPlugin } from '../src/plugin'
+import { parse } from '@babel/parser'
+import generate from '@babel/generator'
 
 /**
  * Helper function to transform code using our plugin
@@ -178,5 +180,65 @@ function outer() {
     const innerEnd = output.indexOf('}', innerStart)
     const innerBody = output.slice(innerStart, innerEnd)
     expect(innerBody).not.toContain('defers')
+  })
+
+  it('should transform nested functions independently if both use defer', () => {
+    const input = `
+function foo() {
+    const db = Db.open();
+    defer(() => db.close());
+
+    function innerFunction() {
+        defer(() => console.log('inner function'));
+    }
+    innerFunction();
+
+    const f = File.open('file.txt');
+    defer(() => f.close());
+}`
+
+    const expected = `
+function foo() {
+    const defers = [];
+    try {
+        const db = Db.open();
+        defers.push(() => db.close());
+
+        function innerFunction() {
+            const defers = [];
+            try {
+                defers.push(() => console.log('inner function'));
+            } finally {
+                for (let i = defers.length - 1; i >= 0; i--) {
+                    try {
+                        defers[i]();
+                    } catch(e) {
+                        console.log(e);
+                    }
+                }
+            }
+        }
+        innerFunction();
+
+        const f = File.open('file.txt');
+        defers.push(() => f.close());
+    } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+            try {
+                defers[i]();
+            } catch(e) {
+                console.log(e);
+            }
+        }
+    }
+}`
+
+    function normalize(code) {
+      const ast = parse(code, { sourceType: 'module', allowImportExportEverywhere: true })
+      return generate(ast, { compact: true }).code
+    }
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
   })
 })
