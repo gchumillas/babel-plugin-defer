@@ -3,6 +3,11 @@ import { createTranspilerPlugin } from '../src/plugin'
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 
+function normalize(code: string) {
+    const ast = parse(code, { sourceType: 'module', allowImportExportEverywhere: true })
+    return generate(ast, { compact: true }).code
+}
+
 /**
  * Helper function to transform code using our plugin
  */
@@ -33,22 +38,28 @@ function foo() {
     defer(() => f.close());
 }`
 
+    const expected = `
+function foo() {
+    const defers = [];
+    try {
+        const db = Db.open();
+        defers.push(() => db.close());
+
+        const f = File.open('file.txt');
+        defers.push(() => f.close());
+    } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+            try {
+                defers[i]();
+            } catch(e) {
+                console.log(e)
+            }
+        }
+    }
+}`
+
     const output = transformWithPlugin(input)
-    
-    // Check that defer calls are replaced with defers.push
-    expect(output).toContain('defers.push(() => db.close())')
-    expect(output).toContain('defers.push(() => f.close())')
-    
-    // Check that try-finally structure is created
-    expect(output).toContain('const defers = []')
-    expect(output).toContain('try {')
-    expect(output).toContain('} finally {')
-    
-    // Check that finally block contains the cleanup logic
-    expect(output).toContain('for (let i = defers.length - 1; i >= 0; i--)')
-    expect(output).toContain('defers[i]()')
-    expect(output).toContain('catch(e) {')
-    expect(output).toContain('console.log(e)')
+    expect(normalize(output)).toBe(normalize(expected))
   })
 
   it('should handle single defer call', () => {
@@ -232,11 +243,6 @@ function foo() {
         }
     }
 }`
-
-    function normalize(code) {
-      const ast = parse(code, { sourceType: 'module', allowImportExportEverywhere: true })
-      return generate(ast, { compact: true }).code
-    }
 
     const output = transformWithPlugin(input)
     expect(normalize(output)).toBe(normalize(expected))
