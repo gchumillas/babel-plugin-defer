@@ -10,6 +10,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./runtime": {
+      "import": "./dist/runtime.mjs",
+      "require": "./dist/runtime.js"
+    },
+    "./plugin": {
+      "import": "./dist/plugin.mjs",
+      "require": "./dist/plugin.js"
     }
   },
   "files": [

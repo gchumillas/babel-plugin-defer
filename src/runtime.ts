@@ -6,3 +6,8 @@ export function println(value: unknown): void {
   // In normal usage, this should be transformed to console.log(`${value}\n`)
   console.log(`${value}\n`)
 }
+
+// Browser-safe global declaration
+declare global {
+  function println(_value: unknown): void
+}

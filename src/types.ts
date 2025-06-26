@@ -24,5 +24,11 @@ export type VariableDeclarationVisitor = (
   _path: NodePath<t.VariableDeclaration>
 ) => void
 
-// Runtime function types
-export declare function println(_value: unknown): void
+// Global type declarations for babel-defer
+declare global {
+  /**
+   * Print a value to console with newline
+   * This function is transpiled by babel-defer plugin to console.log()
+   */
+  function println(_value: unknown): void
+}
