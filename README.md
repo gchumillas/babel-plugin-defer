@@ -1,10 +1,10 @@
-# babel-defer
+# babel-plugin-defer
 
 A Babel plugin that transpiles `defer` statements to JavaScript, bringing Go-like defer functionality to JavaScript/TypeScript applications.
 
 ## Overview
 
-`babel-defer` is a Babel transpiler plugin that enables developers to use `defer` statements in JavaScript and TypeScript, similar to the defer mechanism found in languages like Go and V. The plugin automatically transpiles defer calls into proper JavaScript code that executes cleanup functions at the end of the current scope.
+`babel-plugin-defer` is a Babel transpiler plugin that enables developers to use `defer` statements in JavaScript and TypeScript, similar to the defer mechanism found in languages like Go and V. The plugin automatically transpiles defer calls into proper JavaScript code that executes cleanup functions at the end of the current scope.
 
 ## What is `defer`?
 
@@ -41,7 +41,7 @@ fn process_file(filename string) ! {
 }
 ```
 
-**With babel-defer (JavaScript/TypeScript):**
+**With babel-plugin-defer (JavaScript/TypeScript):**
 ```javascript
 function processFile(filename) {
     const file = fs.openSync(filename)
@@ -57,7 +57,7 @@ function processFile(filename) {
 ### 1. Install the package
 
 ```bash
-npm install babel-defer
+npm install babel-plugin-defer
 ```
 
 ### 2. Configure Vite (React applications)
@@ -67,13 +67,29 @@ Add the plugin to your `vite.config.ts`:
 ```typescript
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import babelDefer from 'babel-defer'
 
 export default defineConfig({
   plugins: [
     react({
       babel: {
-        plugins: [babelDefer()]
+        plugins: ["defer"] // Short form - Babel auto-discovers babel-plugin-defer
+      }
+    })
+  ],
+})
+```
+
+**Alternative explicit import:**
+```typescript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import babelPluginDefer from 'babel-plugin-defer'
+
+export default defineConfig({
+  plugins: [
+    react({
+      babel: {
+        plugins: [babelPluginDefer()]
       }
     })
   ],
@@ -107,7 +123,7 @@ function example() {
 You can also import the function explicitly if preferred:
 
 ```typescript
-import { defer } from 'babel-defer/runtime'
+import { defer } from 'babel-plugin-defer/runtime'
 
 function example() {
   const resource = acquireResource()

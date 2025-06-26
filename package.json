@@ -1,7 +1,7 @@
 {
-  "name": "babel-defer",
+  "name": "babel-plugin-defer",
   "version": "1.0.0",
-  "description": "Babel defer transpiler",
+  "description": "Babel plugin that transpiles defer statements to JavaScript",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
