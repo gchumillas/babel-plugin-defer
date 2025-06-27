@@ -1,5 +1,7 @@
 # babel-plugin-defer
 
+> **⚠️ This library is under active development and is not yet production-ready. Use at your own risk. Breaking changes and bugs are likely.**
+
 [![npm version](https://badge.fury.io/js/babel-plugin-defer.svg)](https://badge.fury.io/js/babel-plugin-defer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
