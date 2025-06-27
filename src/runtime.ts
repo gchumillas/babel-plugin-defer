@@ -11,6 +11,5 @@
 export function defer(fn: () => void): void {
   // Fallback implementation - in practice, this should be transpiled
   // by the Babel plugin to proper try/finally blocks
-  // Using Promise.resolve() as a cross-platform fallback
-  Promise.resolve().then(fn).catch(console.error)
+  console.warn('[FALLBACK] defer', fn)
 }
