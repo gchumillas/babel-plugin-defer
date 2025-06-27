@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release of babel-plugin-defer
 - Support for `defer` statement transpilation to try/finally blocks
-- Support for `println` function transpilation to console.log
 - Runtime fallback functions for environments without Babel
 - Full TypeScript support with type declarations
 - Vite integration support
@@ -18,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 - Transpiles `defer(() => cleanup())` to proper try/finally blocks
-- Transpiles `println(value)` to `console.log(\`${value}\\n\`)`
 - Browser-safe runtime exports at `/runtime`
 - Zero dependencies in runtime bundle
 - Full compatibility with React, Vite, and modern build tools

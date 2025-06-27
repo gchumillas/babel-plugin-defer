@@ -57,19 +57,10 @@
   "scripts": {
     "clean": "node scripts/clean.js",
     "build": "npm run clean && rollup -c",
-    "build:tsc": "tsc",
-    "dev": "ts-node src/index.ts",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "watch": "tsc --watch",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "format": "eslint src/**/*.ts --fix",
-    "format:check": "eslint src/**/*.ts",
-    "check": "npm run lint",
-    "precommit": "npm run check && npm run build",
-    "prepublishOnly": "npm run check && npm run build && npm test"
+    "prepublishOnly": "npm run lint && npm run build && npm test"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",

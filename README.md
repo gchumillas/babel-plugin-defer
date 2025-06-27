@@ -111,8 +111,6 @@ npm install --save-dev @babel/core
 
 ## Usage
 
-### Import the functions explicitly
-
 Import the functions you need from the runtime package:
 
 ```typescript
@@ -124,20 +122,6 @@ function example() {
   
   // Your code here...
   // cleanup() will be called automatically when function exits
-}
-```
-
-### Multiple functions available
-
-```typescript
-import { defer, println } from 'babel-plugin-defer/runtime'
-
-function handleRequest() {
-  const startTime = Date.now()
-  defer(() => console.log(`Request took ${Date.now() - startTime}ms`))
-  
-  println('Processing request...')
-  // Handle request...
 }
 ```
 

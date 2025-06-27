@@ -67,8 +67,6 @@ try {
 
 // Show tested features
 console.log('\\n🎯 Tested Features:')
-console.log('   ✅ println() → console.log() transformation')
-console.log('   ✅ == → === and != → !== transformation')
 console.log('   ✅ defer() call detection')
 console.log('   ✅ Complex integration cases')
 console.log('   ✅ Error handling')

@@ -4,15 +4,6 @@
  */
 
 /**
- * Print a value to console with newline
- * This function is transpiled by babel-defer plugin to console.log()
- * when the Babel plugin is configured, otherwise it works as a fallback
- */
-export function println(value: unknown): void {
-  console.log(`${String(value)}\n`)
-}
-
-/**
  * Defer a function call to be executed when the current function scope exits
  * This function is transpiled by babel-defer plugin to try/finally blocks
  * when the Babel plugin is configured, otherwise it works as a fallback
