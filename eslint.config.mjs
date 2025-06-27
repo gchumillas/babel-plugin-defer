@@ -1,4 +1,9 @@
 import js from '@eslint/js';
+
+// Set tab size to 2 spaces for all files
+// ESLint core rule: indent
+// https://eslint.org/docs/latest/rules/indent
+// For TypeScript, handled by @stylistic/indent
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import stylistic from '@stylistic/eslint-plugin';
@@ -28,11 +33,14 @@ export default [
       '@stylistic': stylistic
     },
     rules: {
+      indent: ['error', 2],
+
       // TypeScript specific rules
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       
       // Stylistic rules for TypeScript
+      '@stylistic/indent': ['error', 2],
       '@stylistic/semi': ['error', 'never'],
       '@stylistic/member-delimiter-style': ['error', {
         multiline: {

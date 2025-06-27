@@ -263,6 +263,10 @@ function foo() {
 
     function innerFunction() {
         defer(() => console.log('inner function'));
+
+        function innerFunction() {
+            defer(() => console.log('inner function 2'))
+        }
     }
     innerFunction();
 
@@ -281,6 +285,21 @@ function foo() {
             const defers = [];
             try {
                 defers.push(() => console.log('inner function'));
+
+                function innerFunction() {
+                    const defers = [];
+                    try {
+                        defers.push(() => console.log('inner function 2'));
+                    } finally {
+                        for (let i = defers.length - 1; i >= 0; i--) {
+                            try {
+                                defers[i]();
+                            } catch(e) {
+                                console.log(e);
+                            }
+                        }
+                    }
+                }
             } finally {
                 for (let i = defers.length - 1; i >= 0; i--) {
                     try {
