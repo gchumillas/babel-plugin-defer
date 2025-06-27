@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-defer",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Babel plugin that transpiles defer statements to JavaScript, bringing Go-like defer functionality to JavaScript/TypeScript applications",
   "keywords": [
     "babel",
