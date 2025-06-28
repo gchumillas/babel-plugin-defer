@@ -1,5 +1,5 @@
 import type { PluginObj } from '@babel/core'
-import type { NodePath } from '@babel/traverse'
+import type { NodePath, Scope } from '@babel/traverse'
 import * as t from '@babel/types'
 
 /**
@@ -9,98 +9,125 @@ export function createTranspilerPlugin(): PluginObj {
   return {
     name: 'custom-transpiler',
     visitor: {
-      // Helper: check if a function body contains any defer() calls
+      // Function declarations
       FunctionDeclaration(path: NodePath<t.FunctionDeclaration>) {
         const { node } = path
 
-        // Check if the function has defer calls
         if (!node.body || !hasDeferCall(node.body)) {
-          return // Do not transform if there are no defer calls
+          return
         }
 
-        // Generate a unique identifier for defers
-        const defersId = path.scope.generateUidIdentifier('defers')
+        transformFunctionWithDefer(node.body, path.scope)
+      },
 
-        // Create the defers array
-        const defersDeclaration = t.variableDeclaration('const', [
-          t.variableDeclarator(
-            defersId,
-            t.arrayExpression([])
+      // Arrow functions
+      ArrowFunctionExpression(path: NodePath<t.ArrowFunctionExpression>) {
+        const { node } = path
+
+        // Solo transformar si el cuerpo es un BlockStatement y contiene defer calls
+        if (!t.isBlockStatement(node.body) || !hasDeferCall(node.body)) {
+          return
+        }
+
+        transformFunctionWithDefer(node.body, path.scope)
+      },
+
+      // Function expressions (callbacks)
+      FunctionExpression(path: NodePath<t.FunctionExpression>) {
+        const { node } = path
+
+        if (!node.body || !hasDeferCall(node.body)) {
+          return
+        }
+
+        transformFunctionWithDefer(node.body, path.scope)
+      },
+    },
+  }
+}
+
+// Función común para transformar cualquier tipo de función que contenga defer
+function transformFunctionWithDefer(body: t.BlockStatement, scope: Scope): void {
+  // Generate a unique identifier for defers
+  const defersId = scope.generateUidIdentifier('defers')
+
+  // Create the defers array
+  const defersDeclaration = t.variableDeclaration('const', [
+    t.variableDeclarator(
+      defersId,
+      t.arrayExpression([])
+    )
+  ])
+
+  // Transform all defer() calls in the function body
+  const transformedBody: t.Statement[] = []
+  for (const statement of body.body) {
+    transformStatement(statement, transformedBody, defersId)
+  }
+
+  // Create the finally block with the reverse execution loop
+  const finallyBlock = t.blockStatement([
+    t.forStatement(
+      t.variableDeclaration('let', [
+        t.variableDeclarator(
+          t.identifier('i'),
+          t.binaryExpression(
+            '-',
+            t.memberExpression(
+              defersId,
+              t.identifier('length')
+            ),
+            t.numericLiteral(1)
           )
-        ])
-
-        // Transform all defer() calls in the function body
-        const transformedBody: t.Statement[] = []
-        for (const statement of node.body.body) {
-          transformStatement(statement, transformedBody, defersId)
-        }
-
-        // Create the finally block with the reverse execution loop, using the unique defersId
-        const finallyBlock = t.blockStatement([
-          t.forStatement(
-            t.variableDeclaration('let', [
-              t.variableDeclarator(
-                t.identifier('i'),
-                t.binaryExpression(
-                  '-',
-                  t.memberExpression(
-                    defersId,
-                    t.identifier('length')
-                  ),
-                  t.numericLiteral(1)
-                )
+        )
+      ]),
+      t.binaryExpression('>=', t.identifier('i'), t.numericLiteral(0)),
+      t.updateExpression('--', t.identifier('i')),
+      t.blockStatement([
+        t.tryStatement(
+          t.blockStatement([
+            t.expressionStatement(
+              t.callExpression(
+                t.memberExpression(
+                  defersId,
+                  t.identifier('i'),
+                  true // computed: defers[i]
+                ),
+                []
               )
-            ]),
-            t.binaryExpression('>=', t.identifier('i'), t.numericLiteral(0)),
-            t.updateExpression('--', t.identifier('i')),
+            )
+          ]),
+          t.catchClause(
+            t.identifier('e'),
             t.blockStatement([
-              t.tryStatement(
-                t.blockStatement([
-                  t.expressionStatement(
-                    t.callExpression(
-                      t.memberExpression(
-                        defersId,
-                        t.identifier('i'),
-                        true // computed: defers[i]
-                      ),
-                      []
-                    )
-                  )
-                ]),
-                t.catchClause(
-                  t.identifier('e'),
-                  t.blockStatement([
-                    t.expressionStatement(
-                      t.callExpression(
-                        t.memberExpression(
-                          t.identifier('console'),
-                          t.identifier('log')
-                        ),
-                        [t.identifier('e')]
-                      )
-                    )
-                  ])
+              t.expressionStatement(
+                t.callExpression(
+                  t.memberExpression(
+                    t.identifier('console'),
+                    t.identifier('log')
+                  ),
+                  [t.identifier('e')]
                 )
               )
             ])
           )
-        ])
-
-        // Create the try-finally statement
-        const tryFinally = t.tryStatement(
-          t.blockStatement(transformedBody),
-          null, // no catch
-          finallyBlock
         )
+      ])
+    )
+  ])
 
-        // Replace the function body
-        node.body = t.blockStatement([
-          defersDeclaration,
-          tryFinally
-        ])
-      },
-    },
-  }
+  // Create the try-finally statement
+  const tryFinally = t.tryStatement(
+    t.blockStatement(transformedBody),
+    null, // no catch
+    finallyBlock
+  )
+
+  // Replace the function body
+  body.body = [
+    defersDeclaration,
+    tryFinally
+  ]
 }
 
 // Helper: check if a function body contains any defer() calls
