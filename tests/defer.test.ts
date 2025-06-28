@@ -9,8 +9,8 @@ function normalizeDefersName(code: string): string {
 }
 
 function normalize(code: string) {
-    const ast = parse(code, { sourceType: 'module', allowImportExportEverywhere: true })
-    return normalizeDefersName(generate(ast, { compact: true }).code)
+  const ast = parse(code, { sourceType: 'module', allowImportExportEverywhere: true })
+  return normalizeDefersName(generate(ast, { compact: true }).code)
 }
 
 /**
@@ -35,33 +35,33 @@ function transformWithPlugin(code: string, debug = false): string {
 describe('Defer transformation', () => {
   it('should transform function with defer calls to try-finally pattern', () => {
     const input = `
-function foo() {
-    const db = Db.open();
-    defer(() => db.close());
+    function foo() {
+      const db = Db.open();
+      defer(() => db.close());
 
-    const f = File.open('file.txt');
-    defer(() => f.close());
-}`
+      const f = File.open('file.txt');
+      defer(() => f.close());
+    }`
 
     const expected = `
-function foo() {
-    const defers = [];
-    try {
+    function foo() {
+      const defers = [];
+      try {
         const db = Db.open();
         defers.push(() => db.close());
 
         const f = File.open('file.txt');
         defers.push(() => f.close());
-    } finally {
+      } finally {
         for (let i = defers.length - 1; i >= 0; i--) {
-            try {
-                defers[i]();
-            } catch(e) {
-                console.log(e)
-            }
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e)
+          }
         }
-    }
-}`
+      }
+    }`
 
     const output = transformWithPlugin(input)
     expect(normalize(output)).toBe(normalize(expected))
@@ -69,27 +69,27 @@ function foo() {
 
   it('should handle single defer call', () => {
     const input = `
-function test() {
-    const resource = openResource();
-    defer(() => resource.close());
-}`
+    function test() {
+      const resource = openResource();
+      defer(() => resource.close());
+    }`
 
     const expected = `
-function test() {
-    const defers = [];
-    try {
+    function test() {
+      const defers = [];
+      try {
         const resource = openResource();
         defers.push(() => resource.close());
-    } finally {
+      } finally {
         for (let i = defers.length - 1; i >= 0; i--) {
-            try {
-                defers[i]();
-            } catch(e) {
-                console.log(e)
-            }
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e)
+          }
         }
-    }
-}`
+      }
+    }`
 
     const output = transformWithPlugin(input)
     expect(normalize(output)).toBe(normalize(expected))
@@ -97,47 +97,47 @@ function test() {
 
   it('should handle function without defer calls unchanged', () => {
     const input = `
-function normal() {
-    const x = 1;
-    console.log(x);
-    return x;
-}`
+    function normal() {
+      const x = 1;
+      console.log(x);
+      return x;
+    }`
     const expected = `
-function normal() {
-    const x = 1;
-    console.log(x);
-    return x;
-}`
-    
+    function normal() {
+      const x = 1;
+      console.log(x);
+      return x;
+    }`
+
     const output = transformWithPlugin(input)
     expect(normalize(output)).toBe(normalize(expected))
   })
 
   it('should handle multiple defer calls in correct reverse order', () => {
     const input = `
-function multiDefer() {
-    defer(() => console.log('first'));
-    defer(() => console.log('second'));
-    defer(() => console.log('third'));
-}`
+    function multiDefer() {
+      defer(() => console.log('first'));
+      defer(() => console.log('second'));
+      defer(() => console.log('third'));
+    }`
 
     const expected = `
-function multiDefer() {
-    const defers = [];
-    try {
+    function multiDefer() {
+      const defers = [];
+      try {
         defers.push(() => console.log('first'));
         defers.push(() => console.log('second'));
         defers.push(() => console.log('third'));
-    } finally {
+      } finally {
         for (let i = defers.length - 1; i >= 0; i--) {
-            try {
-                defers[i]();
-            } catch(e) {
-                console.log(e)
-            }
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e)
+          }
         }
-    }
-}`
+      }
+    }`
 
     const output = transformWithPlugin(input)
     expect(normalize(output)).toBe(normalize(expected))
@@ -145,36 +145,36 @@ function multiDefer() {
 
   it('should handle defer in nested blocks', () => {
     const input = `
-function withNested() {
-    const db = openDb();
-    defer(() => db.close());
-    
-    if (condition) {
+    function withNested() {
+      const db = openDb();
+      defer(() => db.close());
+      
+      if (condition) {
         const file = openFile();
         defer(() => file.close());
-    }
-}`
+      }
+    }`
 
     const expected = `
-function withNested() {
-    const defers = [];
-    try {
+    function withNested() {
+      const defers = [];
+      try {
         const db = openDb();
         defers.push(() => db.close());
         if (condition) {
-            const file = openFile();
-            defers.push(() => file.close());
+          const file = openFile();
+          defers.push(() => file.close());
         }
-    } finally {
+      } finally {
         for (let i = defers.length - 1; i >= 0; i--) {
-            try {
-                defers[i]();
-            } catch(e) {
-                console.log(e)
-            }
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e)
+          }
         }
-    }
-}`
+      }
+    }`
 
     const output = transformWithPlugin(input)
     expect(normalize(output)).toBe(normalize(expected))
@@ -182,39 +182,39 @@ function withNested() {
 
   it('should preserve original function structure and other statements', () => {
     const input = `
-function complex() {
-    let result = 0;
-    const conn = connect();
-    defer(() => conn.disconnect());
-    
-    for (let i = 0; i < 10; i++) {
+    function complex() {
+      let result = 0;
+      const conn = connect();
+      defer(() => conn.disconnect());
+      
+      for (let i = 0; i < 10; i++) {
         result += i;
-    }
-    
-    return result;
-}`
+      }
+      
+      return result;
+    }`
 
     const expected = `
-function complex() {
-    const defers = [];
-    try {
+    function complex() {
+      const defers = [];
+      try {
         let result = 0;
         const conn = connect();
         defers.push(() => conn.disconnect());
         for (let i = 0; i < 10; i++) {
-            result += i;
+          result += i;
         }
         return result;
-    } finally {
+      } finally {
         for (let i = defers.length - 1; i >= 0; i--) {
-            try {
-                defers[i]();
-            } catch(e) {
-                console.log(e)
-            }
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e)
+          }
         }
-    }
-}`
+      }
+    }`
 
     const output = transformWithPlugin(input)
     expect(normalize(output)).toBe(normalize(expected))
@@ -222,39 +222,39 @@ function complex() {
 
   it('should only transform functions with defer, not nested functions without defer', () => {
     const input = `
-function outer() {
-  const db = Db.open()
-  defer(() => db.close())
+    function outer() {
+      const db = Db.open()
+      defer(() => db.close())
 
-  function inner() {
-    const x = 42
-    return x
-  }
+      function inner() {
+        const x = 42
+        return x
+      }
 
-  return inner()
-}`
+      return inner()
+    }`
 
     const expected = `
-function outer() {
-  const defers = [];
-  try {
-    const db = Db.open()
-    defers.push(() => db.close())
-    function inner() {
-      const x = 42
-      return x
-    }
-    return inner()
-  } finally {
-    for (let i = defers.length - 1; i >= 0; i--) {
+    function outer() {
+      const defers = [];
       try {
-        defers[i]()
-      } catch(e) {
-        console.log(e)
+        const db = Db.open()
+        defers.push(() => db.close())
+        function inner() {
+          const x = 42
+          return x
+        }
+        return inner()
+      } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+          try {
+            defers[i]()
+          } catch(e) {
+            console.log(e)
+          }
+        }
       }
-    }
-  }
-}`
+    }`
 
     const output = transformWithPlugin(input)
     expect(normalize(output)).toBe(normalize(expected))
@@ -262,73 +262,73 @@ function outer() {
 
   it('should transform nested functions independently if both use defer', () => {
     const input = `
-function foo() {
-    const db = Db.open();
-    defer(() => db.close());
+    function foo() {
+      const db = Db.open();
+      defer(() => db.close());
 
-    function innerFunction() {
+      function innerFunction() {
         defer(() => console.log('inner function'));
 
         function innerFunction() {
-            defer(() => console.log('inner function 2'))
+          defer(() => console.log('inner function 2'))
         }
-    }
-    innerFunction();
+      }
+      innerFunction();
 
-    const f = File.open('file.txt');
-    defer(() => f.close());
-}`
+      const f = File.open('file.txt');
+      defer(() => f.close());
+    }`
 
     const expected = `
-function foo() {
-    const defers = [];
-    try {
+    function foo() {
+      const defers = [];
+      try {
         const db = Db.open();
         defers.push(() => db.close());
 
         function innerFunction() {
-            const defers = [];
-            try {
-                defers.push(() => console.log('inner function'));
+          const defers = [];
+          try {
+            defers.push(() => console.log('inner function'));
 
-                function innerFunction() {
-                    const defers = [];
-                    try {
-                        defers.push(() => console.log('inner function 2'));
-                    } finally {
-                        for (let i = defers.length - 1; i >= 0; i--) {
-                            try {
-                                defers[i]();
-                            } catch(e) {
-                                console.log(e);
-                            }
-                        }
-                    }
-                }
-            } finally {
+            function innerFunction() {
+              const defers = [];
+              try {
+                defers.push(() => console.log('inner function 2'));
+              } finally {
                 for (let i = defers.length - 1; i >= 0; i--) {
-                    try {
-                        defers[i]();
-                    } catch(e) {
-                        console.log(e);
-                    }
+                  try {
+                    defers[i]();
+                  } catch(e) {
+                    console.log(e);
+                  }
                 }
+              }
             }
+          } finally {
+            for (let i = defers.length - 1; i >= 0; i--) {
+              try {
+                defers[i]();
+              } catch(e) {
+                console.log(e);
+              }
+            }
+          }
         }
         innerFunction();
 
         const f = File.open('file.txt');
         defers.push(() => f.close());
-    } finally {
+      } finally {
         for (let i = defers.length - 1; i >= 0; i--) {
-            try {
-                defers[i]();
-            } catch(e) {
-                console.log(e);
-            }
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e);
+          }
         }
-    }
-}`
+      }
+    }`
 
     const output = transformWithPlugin(input)
     expect(normalize(output)).toBe(normalize(expected))
@@ -337,33 +337,33 @@ function foo() {
   describe('Arrow Functions', () => {
     it('should transform arrow function with defer calls', () => {
       const input = `
-const processData = () => {
-    const db = openDb();
-    defer(() => db.close());
-    
-    const file = openFile();
-    defer(() => file.close());
-}`
-
-      const expected = `
-const processData = () => {
-    const defers = [];
-    try {
+      const processData = () => {
         const db = openDb();
-        defers.push(() => db.close());
+        defer(() => db.close());
         
         const file = openFile();
-        defers.push(() => file.close());
-    } finally {
-        for (let i = defers.length - 1; i >= 0; i--) {
+        defer(() => file.close());
+      }`
+
+      const expected = `
+      const processData = () => {
+        const defers = [];
+        try {
+          const db = openDb();
+          defers.push(() => db.close());
+          
+          const file = openFile();
+          defers.push(() => file.close());
+        } finally {
+          for (let i = defers.length - 1; i >= 0; i--) {
             try {
-                defers[i]();
+              defers[i]();
             } catch(e) {
-                console.log(e);
+              console.log(e);
             }
+          }
         }
-    }
-}`
+      }`
 
       const output = transformWithPlugin(input)
       expect(normalize(output)).toBe(normalize(expected))
@@ -371,18 +371,18 @@ const processData = () => {
 
     it('should not transform arrow function without defer calls', () => {
       const input = `
-const calculate = () => {
-    const x = 10;
-    const y = 20;
-    return x + y;
-}`
+      const calculate = () => {
+        const x = 10;
+        const y = 20;
+        return x + y;
+      }`
 
       const expected = `
-const calculate = () => {
-    const x = 10;
-    const y = 20;
-    return x + y;
-}`
+      const calculate = () => {
+        const x = 10;
+        const y = 20;
+        return x + y;
+      }`
 
       const output = transformWithPlugin(input)
       expect(normalize(output)).toBe(normalize(expected))
@@ -390,12 +390,12 @@ const calculate = () => {
 
     it('should not transform arrow function with expression body', () => {
       const input = `
-const getValue = () => someValue;
-const add = (a, b) => a + b;`
+      const getValue = () => someValue;
+      const add = (a, b) => a + b;`
 
       const expected = `
-const getValue = () => someValue;
-const add = (a, b) => a + b;`
+      const getValue = () => someValue;
+      const add = (a, b) => a + b;`
 
       const output = transformWithPlugin(input)
       expect(normalize(output)).toBe(normalize(expected))
@@ -403,37 +403,37 @@ const add = (a, b) => a + b;`
 
     it('should handle arrow function in variable assignment with nested defer', () => {
       const input = `
-const handler = () => {
-    const conn = connect();
-    defer(() => conn.close());
-    
-    if (needsFile) {
-        const file = openFile();
-        defer(() => file.close());
-    }
-}`
-
-      const expected = `
-const handler = () => {
-    const defers = [];
-    try {
+      const handler = () => {
         const conn = connect();
-        defers.push(() => conn.close());
+        defer(() => conn.close());
         
         if (needsFile) {
+          const file = openFile();
+          defer(() => file.close());
+        }
+      }`
+
+      const expected = `
+      const handler = () => {
+        const defers = [];
+        try {
+          const conn = connect();
+          defers.push(() => conn.close());
+          
+          if (needsFile) {
             const file = openFile();
             defers.push(() => file.close());
-        }
-    } finally {
-        for (let i = defers.length - 1; i >= 0; i--) {
+          }
+        } finally {
+          for (let i = defers.length - 1; i >= 0; i--) {
             try {
-                defers[i]();
+              defers[i]();
             } catch(e) {
-                console.log(e);
+              console.log(e);
             }
+          }
         }
-    }
-}`
+      }`
 
       const output = transformWithPlugin(input)
       expect(normalize(output)).toBe(normalize(expected))
@@ -443,33 +443,33 @@ const handler = () => {
   describe('Function Expressions and Callbacks', () => {
     it('should transform function expression with defer calls', () => {
       const input = `
-const handler = function(req, res) {
-    const db = openDatabase();
-    defer(() => db.close());
-    
-    const session = createSession();
-    defer(() => session.destroy());
-}`
-
-      const expected = `
-const handler = function(req, res) {
-    const defers = [];
-    try {
+      const handler = function(req, res) {
         const db = openDatabase();
-        defers.push(() => db.close());
+        defer(() => db.close());
         
         const session = createSession();
-        defers.push(() => session.destroy());
-    } finally {
-        for (let i = defers.length - 1; i >= 0; i--) {
+        defer(() => session.destroy());
+      }`
+
+      const expected = `
+      const handler = function(req, res) {
+        const defers = [];
+        try {
+          const db = openDatabase();
+          defers.push(() => db.close());
+          
+          const session = createSession();
+          defers.push(() => session.destroy());
+        } finally {
+          for (let i = defers.length - 1; i >= 0; i--) {
             try {
-                defers[i]();
+              defers[i]();
             } catch(e) {
-                console.log(e);
+              console.log(e);
             }
+          }
         }
-    }
-}`
+      }`
 
       const output = transformWithPlugin(input)
       expect(normalize(output)).toBe(normalize(expected))
@@ -477,33 +477,33 @@ const handler = function(req, res) {
 
     it('should transform callback function with defer calls', () => {
       const input = `
-items.forEach(function(item) {
-    const file = openFile(item.path);
-    defer(() => file.close());
-    
-    const lock = acquireLock(item.id);
-    defer(() => lock.release());
-})`
-
-      const expected = `
-items.forEach(function(item) {
-    const defers = [];
-    try {
+      items.forEach(function(item) {
         const file = openFile(item.path);
-        defers.push(() => file.close());
+        defer(() => file.close());
         
         const lock = acquireLock(item.id);
-        defers.push(() => lock.release());
-    } finally {
-        for (let i = defers.length - 1; i >= 0; i--) {
+        defer(() => lock.release());
+      })`
+
+      const expected = `
+      items.forEach(function(item) {
+        const defers = [];
+        try {
+          const file = openFile(item.path);
+          defers.push(() => file.close());
+          
+          const lock = acquireLock(item.id);
+          defers.push(() => lock.release());
+        } finally {
+          for (let i = defers.length - 1; i >= 0; i--) {
             try {
-                defers[i]();
+              defers[i]();
             } catch(e) {
-                console.log(e);
+              console.log(e);
             }
+          }
         }
-    }
-})`
+      })`
 
       const output = transformWithPlugin(input)
       expect(normalize(output)).toBe(normalize(expected))
@@ -511,16 +511,16 @@ items.forEach(function(item) {
 
     it('should not transform function expression without defer calls', () => {
       const input = `
-const processor = function(data) {
-    const result = process(data);
-    return result;
-}`
+      const processor = function(data) {
+        const result = process(data);
+        return result;
+      }`
 
       const expected = `
-const processor = function(data) {
-    const result = process(data);
-    return result;
-}`
+      const processor = function(data) {
+        const result = process(data);
+        return result;
+      }`
 
       const output = transformWithPlugin(input)
       expect(normalize(output)).toBe(normalize(expected))
@@ -528,52 +528,52 @@ const processor = function(data) {
 
     it('should transform nested function expressions independently', () => {
       const input = `
-const outer = function() {
-    const db = openDb();
-    defer(() => db.close());
-    
-    const inner = function() {
-        const cache = openCache();
-        defer(() => cache.clear());
-    };
-    
-    inner();
-}`
-
-      const expected = `
-const outer = function() {
-    const defers = [];
-    try {
+      const outer = function() {
         const db = openDb();
-        defers.push(() => db.close());
+        defer(() => db.close());
         
         const inner = function() {
-            const defers = [];
-            try {
-                const cache = openCache();
-                defers.push(() => cache.clear());
-            } finally {
-                for (let i = defers.length - 1; i >= 0; i--) {
-                    try {
-                        defers[i]();
-                    } catch(e) {
-                        console.log(e);
-                    }
-                }
-            }
+          const cache = openCache();
+          defer(() => cache.clear());
         };
         
         inner();
-    } finally {
-        for (let i = defers.length - 1; i >= 0; i--) {
+      }`
+
+      const expected = `
+      const outer = function() {
+        const defers = [];
+        try {
+          const db = openDb();
+          defers.push(() => db.close());
+          
+          const inner = function() {
+            const defers = [];
             try {
-                defers[i]();
-            } catch(e) {
-                console.log(e);
+              const cache = openCache();
+              defers.push(() => cache.clear());
+            } finally {
+              for (let i = defers.length - 1; i >= 0; i--) {
+                try {
+                  defers[i]();
+                } catch(e) {
+                  console.log(e);
+                }
+              }
             }
+          };
+          
+          inner();
+        } finally {
+          for (let i = defers.length - 1; i >= 0; i--) {
+            try {
+              defers[i]();
+            } catch(e) {
+              console.log(e);
+            }
+          }
         }
-    }
-}`
+      }`
 
       const output = transformWithPlugin(input)
       expect(normalize(output)).toBe(normalize(expected))
@@ -583,75 +583,75 @@ const outer = function() {
   describe('Mixed Function Types', () => {
     it('should handle mixed function types with defer independently', () => {
       const input = `
-function regularFunc() {
-    const db = openDb();
-    defer(() => db.close());
-    
-    const arrowFunc = () => {
-        const file = openFile();
-        defer(() => file.close());
-    };
-    
-    const callback = function(item) {
-        const lock = acquireLock();
-        defer(() => lock.release());
-    };
-    
-    arrowFunc();
-    items.forEach(callback);
-}`
-
-      const expected = `
-function regularFunc() {
-    const defers = [];
-    try {
+      function regularFunc() {
         const db = openDb();
-        defers.push(() => db.close());
+        defer(() => db.close());
         
         const arrowFunc = () => {
-            const defers = [];
-            try {
-                const file = openFile();
-                defers.push(() => file.close());
-            } finally {
-                for (let i = defers.length - 1; i >= 0; i--) {
-                    try {
-                        defers[i]();
-                    } catch(e) {
-                        console.log(e);
-                    }
-                }
-            }
+          const file = openFile();
+          defer(() => file.close());
         };
         
         const callback = function(item) {
-            const defers = [];
-            try {
-                const lock = acquireLock();
-                defers.push(() => lock.release());
-            } finally {
-                for (let i = defers.length - 1; i >= 0; i--) {
-                    try {
-                        defers[i]();
-                    } catch(e) {
-                        console.log(e);
-                    }
-                }
-            }
+          const lock = acquireLock();
+          defer(() => lock.release());
         };
         
         arrowFunc();
         items.forEach(callback);
-    } finally {
-        for (let i = defers.length - 1; i >= 0; i--) {
+      }`
+
+      const expected = `
+      function regularFunc() {
+        const defers = [];
+        try {
+          const db = openDb();
+          defers.push(() => db.close());
+          
+          const arrowFunc = () => {
+            const defers = [];
             try {
-                defers[i]();
-            } catch(e) {
-                console.log(e);
+              const file = openFile();
+              defers.push(() => file.close());
+            } finally {
+              for (let i = defers.length - 1; i >= 0; i--) {
+                try {
+                  defers[i]();
+                } catch(e) {
+                  console.log(e);
+                }
+              }
             }
+          };
+          
+          const callback = function(item) {
+            const defers = [];
+            try {
+              const lock = acquireLock();
+              defers.push(() => lock.release());
+            } finally {
+              for (let i = defers.length - 1; i >= 0; i--) {
+                try {
+                  defers[i]();
+                } catch(e) {
+                  console.log(e);
+                }
+              }
+            }
+          };
+          
+          arrowFunc();
+          items.forEach(callback);
+        } finally {
+          for (let i = defers.length - 1; i >= 0; i--) {
+            try {
+              defers[i]();
+            } catch(e) {
+              console.log(e);
+            }
+          }
         }
-    }
-}`
+      }`
 
       const output = transformWithPlugin(input)
       expect(normalize(output)).toBe(normalize(expected))
@@ -659,70 +659,70 @@ function regularFunc() {
 
     it('should only transform functions that actually use defer', () => {
       const input = `
-function hasDefer() {
-    const resource = acquire();
-    defer(() => resource.release());
-}
-
-const noDefer = () => {
-    const value = calculate();
-    return value;
-};
-
-const mixedCase = function() {
-    const temp = createTemp();
-    defer(() => temp.cleanup());
-    
-    const helper = () => {
-        return "no defer here";
-    };
-    
-    return helper();
-};`
-
-      const expected = `
-function hasDefer() {
-    const defers = [];
-    try {
+      function hasDefer() {
         const resource = acquire();
-        defers.push(() => resource.release());
-    } finally {
-        for (let i = defers.length - 1; i >= 0; i--) {
-            try {
-                defers[i]();
-            } catch(e) {
-                console.log(e);
-            }
-        }
-    }
-}
+        defer(() => resource.release());
+      }
 
-const noDefer = () => {
-    const value = calculate();
-    return value;
-};
+      const noDefer = () => {
+        const value = calculate();
+        return value;
+      };
 
-const mixedCase = function() {
-    const defers = [];
-    try {
+      const mixedCase = function() {
         const temp = createTemp();
-        defers.push(() => temp.cleanup());
+        defer(() => temp.cleanup());
         
         const helper = () => {
-            return "no defer here";
+          return "no defer here";
         };
         
         return helper();
-    } finally {
-        for (let i = defers.length - 1; i >= 0; i--) {
+      };`
+
+      const expected = `
+      function hasDefer() {
+        const defers = [];
+        try {
+          const resource = acquire();
+          defers.push(() => resource.release());
+        } finally {
+          for (let i = defers.length - 1; i >= 0; i--) {
             try {
-                defers[i]();
+              defers[i]();
             } catch(e) {
-                console.log(e);
+              console.log(e);
             }
+          }
         }
-    }
-};`
+      }
+
+      const noDefer = () => {
+        const value = calculate();
+        return value;
+      };
+
+      const mixedCase = function() {
+        const defers = [];
+        try {
+          const temp = createTemp();
+          defers.push(() => temp.cleanup());
+          
+          const helper = () => {
+            return "no defer here";
+          };
+          
+          return helper();
+        } finally {
+          for (let i = defers.length - 1; i >= 0; i--) {
+            try {
+              defers[i]();
+            } catch(e) {
+              console.log(e);
+            }
+          }
+        }
+      };`
 
       const output = transformWithPlugin(input)
       expect(normalize(output)).toBe(normalize(expected))
