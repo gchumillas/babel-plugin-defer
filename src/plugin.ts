@@ -18,50 +18,48 @@ export function createTranspilerPlugin(): PluginObj {
           return // Do not transform if there are no defer calls
         }
 
+        // Generate a unique identifier for defers
+        const defersId = path.scope.generateUidIdentifier('defers')
+
         // Create the defers array
         const defersDeclaration = t.variableDeclaration('const', [
           t.variableDeclarator(
-            t.identifier('defers'),
+            defersId,
             t.arrayExpression([])
           )
         ])
 
         // Transform all defer() calls in the function body
         const transformedBody: t.Statement[] = []
-
         for (const statement of node.body.body) {
-          transformStatement(statement, transformedBody)
+          transformStatement(statement, transformedBody, defersId)
         }
 
-        // Create the finally block with the reverse execution loop
+        // Create the finally block with the reverse execution loop, using the unique defersId
         const finallyBlock = t.blockStatement([
           t.forStatement(
-            // init: let i = defers.length - 1
             t.variableDeclaration('let', [
               t.variableDeclarator(
                 t.identifier('i'),
                 t.binaryExpression(
                   '-',
                   t.memberExpression(
-                    t.identifier('defers'),
+                    defersId,
                     t.identifier('length')
                   ),
                   t.numericLiteral(1)
                 )
               )
             ]),
-            // test: i >= 0
             t.binaryExpression('>=', t.identifier('i'), t.numericLiteral(0)),
-            // update: i--
             t.updateExpression('--', t.identifier('i')),
-            // body: try { defers[i]() } catch(e) { console.log(e) }
             t.blockStatement([
               t.tryStatement(
                 t.blockStatement([
                   t.expressionStatement(
                     t.callExpression(
                       t.memberExpression(
-                        t.identifier('defers'),
+                        defersId,
                         t.identifier('i'),
                         true // computed: defers[i]
                       ),
@@ -121,7 +119,7 @@ function hasDeferCall(body: t.BlockStatement): boolean {
 }
 
 // Helper function to recursively transform statements
-function transformStatement(statement: t.Statement, result: t.Statement[]): void {
+function transformStatement(statement: t.Statement, result: t.Statement[], defersId: t.Identifier): void {
   if (t.isExpressionStatement(statement)) {
     const expr = statement.expression
 
@@ -135,7 +133,7 @@ function transformStatement(statement: t.Statement, result: t.Statement[]): void
       const pushCall = t.expressionStatement(
         t.callExpression(
           t.memberExpression(
-            t.identifier('defers'),
+            defersId,
             t.identifier('push')
           ),
           expr.arguments
@@ -148,8 +146,8 @@ function transformStatement(statement: t.Statement, result: t.Statement[]): void
 
   // For statements with nested blocks (if, for, etc.)
   if (t.isIfStatement(statement)) {
-    const transformedConsequent = transformBlock(statement.consequent)
-    const transformedAlternate = statement.alternate ? transformBlock(statement.alternate) : null
+    const transformedConsequent = transformBlock(statement.consequent, defersId)
+    const transformedAlternate = statement.alternate ? transformBlock(statement.alternate, defersId) : null
 
     result.push(t.ifStatement(
       statement.test,
@@ -160,7 +158,7 @@ function transformStatement(statement: t.Statement, result: t.Statement[]): void
   }
 
   if (t.isForStatement(statement)) {
-    const transformedBody = transformBlock(statement.body)
+    const transformedBody = transformBlock(statement.body, defersId)
     result.push(t.forStatement(
       statement.init,
       statement.test,
@@ -171,7 +169,7 @@ function transformStatement(statement: t.Statement, result: t.Statement[]): void
   }
 
   if (t.isWhileStatement(statement)) {
-    const transformedBody = transformBlock(statement.body)
+    const transformedBody = transformBlock(statement.body, defersId)
     result.push(t.whileStatement(statement.test, transformedBody))
     return
   }
@@ -179,7 +177,7 @@ function transformStatement(statement: t.Statement, result: t.Statement[]): void
   if (t.isBlockStatement(statement)) {
     const transformedStatements: t.Statement[] = []
     for (const stmt of statement.body) {
-      transformStatement(stmt, transformedStatements)
+      transformStatement(stmt, transformedStatements, defersId)
     }
     result.push(t.blockStatement(transformedStatements))
     return
@@ -190,16 +188,16 @@ function transformStatement(statement: t.Statement, result: t.Statement[]): void
 }
 
 // Helper function to transform blocks
-function transformBlock(node: t.Statement): t.Statement {
+function transformBlock(node: t.Statement, defersId: t.Identifier): t.Statement {
   if (t.isBlockStatement(node)) {
     const transformedStatements: t.Statement[] = []
     for (const statement of node.body) {
-      transformStatement(statement, transformedStatements)
+      transformStatement(statement, transformedStatements, defersId)
     }
     return t.blockStatement(transformedStatements)
   } else {
     const transformedStatements: t.Statement[] = []
-    transformStatement(node, transformedStatements)
+    transformStatement(node, transformedStatements, defersId)
     return transformedStatements.length === 1
       ? transformedStatements[0]
       : t.blockStatement(transformedStatements)

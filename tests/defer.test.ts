@@ -3,9 +3,14 @@ import { createTranspilerPlugin } from '../src/plugin'
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 
+function normalizeDefersName(code: string): string {
+  // Replace _defers, _defers2, etc. with defers
+  return code.replace(/_defers\d*/g, 'defers')
+}
+
 function normalize(code: string) {
     const ast = parse(code, { sourceType: 'module', allowImportExportEverywhere: true })
-    return generate(ast, { compact: true }).code
+    return normalizeDefersName(generate(ast, { compact: true }).code)
 }
 
 /**
