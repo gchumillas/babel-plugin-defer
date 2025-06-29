@@ -13,7 +13,7 @@ export function createTranspilerPlugin(): PluginObj {
       FunctionDeclaration(path: NodePath<t.FunctionDeclaration>) {
         const { node } = path
 
-        if (!node.body || !hasDeferCall(node.body)) {
+        if (!node.body || !hasDeferCall(node.body, path.scope)) {
           return
         }
 
@@ -25,7 +25,7 @@ export function createTranspilerPlugin(): PluginObj {
         const { node } = path
 
         // Solo transformar si el cuerpo es un BlockStatement y contiene defer calls
-        if (!t.isBlockStatement(node.body) || !hasDeferCall(node.body)) {
+        if (!t.isBlockStatement(node.body) || !hasDeferCall(node.body, path.scope)) {
           return
         }
 
@@ -36,7 +36,7 @@ export function createTranspilerPlugin(): PluginObj {
       FunctionExpression(path: NodePath<t.FunctionExpression>) {
         const { node } = path
 
-        if (!node.body || !hasDeferCall(node.body)) {
+        if (!node.body || !hasDeferCall(node.body, path.scope)) {
           return
         }
 
@@ -62,7 +62,7 @@ function transformFunctionWithDefer(body: t.BlockStatement, scope: Scope): void 
   // Transform all defer() calls in the function body
   const transformedBody: t.Statement[] = []
   for (const statement of body.body) {
-    transformStatement(statement, transformedBody, defersId)
+    transformStatement(statement, transformedBody, defersId, scope)
   }
 
   // Create the finally block with the reverse execution loop
@@ -131,13 +131,15 @@ function transformFunctionWithDefer(body: t.BlockStatement, scope: Scope): void 
 }
 
 // Helper: check if a function body contains any defer() calls
-function hasDeferCall(body: t.BlockStatement): boolean {
+// Now takes scope to verify that 'defer' refers to the global defer function
+function hasDeferCall(body: t.BlockStatement, scope: Scope): boolean {
   let found = false
   t.traverseFast(body, (node) => {
     if (
       t.isCallExpression(node) &&
       t.isIdentifier(node.callee) &&
-      node.callee.name === 'defer'
+      node.callee.name === 'defer' &&
+      isGlobalDefer(node.callee, scope)
     ) {
       found = true
     }
@@ -145,16 +147,35 @@ function hasDeferCall(body: t.BlockStatement): boolean {
   return found
 }
 
+// Helper function to check if an identifier refers to the global 'defer' function
+function isGlobalDefer(identifier: t.Identifier, scope: Scope): boolean {
+  if (identifier.name !== 'defer') {
+    return false
+  }
+
+  // Check if 'defer' is defined in any local scope
+  let currentScope: Scope | null = scope
+  while (currentScope) {
+    if (currentScope.hasOwnBinding('defer')) {
+      return false
+    }
+    currentScope = currentScope.parent
+  }
+
+  return true
+}
+
 // Helper function to recursively transform statements
-function transformStatement(statement: t.Statement, result: t.Statement[], defersId: t.Identifier): void {
+function transformStatement(statement: t.Statement, result: t.Statement[], defersId: t.Identifier, scope: Scope): void {
   if (t.isExpressionStatement(statement)) {
     const expr = statement.expression
 
-    // If it is a defer() call, transform it
+    // If it is a defer() call, transform it - but only if it's the global defer
     if (
       t.isCallExpression(expr) &&
       t.isIdentifier(expr.callee) &&
-      expr.callee.name === 'defer'
+      expr.callee.name === 'defer' &&
+      isGlobalDefer(expr.callee, scope)
     ) {
       // Convert defer(fn) to defers.push(fn)
       const pushCall = t.expressionStatement(
@@ -173,8 +194,8 @@ function transformStatement(statement: t.Statement, result: t.Statement[], defer
 
   // For statements with nested blocks (if, for, etc.)
   if (t.isIfStatement(statement)) {
-    const transformedConsequent = transformBlock(statement.consequent, defersId)
-    const transformedAlternate = statement.alternate ? transformBlock(statement.alternate, defersId) : null
+    const transformedConsequent = transformBlock(statement.consequent, defersId, scope)
+    const transformedAlternate = statement.alternate ? transformBlock(statement.alternate, defersId, scope) : null
 
     result.push(t.ifStatement(
       statement.test,
@@ -185,7 +206,7 @@ function transformStatement(statement: t.Statement, result: t.Statement[], defer
   }
 
   if (t.isForStatement(statement)) {
-    const transformedBody = transformBlock(statement.body, defersId)
+    const transformedBody = transformBlock(statement.body, defersId, scope)
     result.push(t.forStatement(
       statement.init,
       statement.test,
@@ -196,7 +217,7 @@ function transformStatement(statement: t.Statement, result: t.Statement[], defer
   }
 
   if (t.isWhileStatement(statement)) {
-    const transformedBody = transformBlock(statement.body, defersId)
+    const transformedBody = transformBlock(statement.body, defersId, scope)
     result.push(t.whileStatement(statement.test, transformedBody))
     return
   }
@@ -204,7 +225,7 @@ function transformStatement(statement: t.Statement, result: t.Statement[], defer
   if (t.isBlockStatement(statement)) {
     const transformedStatements: t.Statement[] = []
     for (const stmt of statement.body) {
-      transformStatement(stmt, transformedStatements, defersId)
+      transformStatement(stmt, transformedStatements, defersId, scope)
     }
     result.push(t.blockStatement(transformedStatements))
     return
@@ -215,16 +236,16 @@ function transformStatement(statement: t.Statement, result: t.Statement[], defer
 }
 
 // Helper function to transform blocks
-function transformBlock(node: t.Statement, defersId: t.Identifier): t.Statement {
+function transformBlock(node: t.Statement, defersId: t.Identifier, scope: Scope): t.Statement {
   if (t.isBlockStatement(node)) {
     const transformedStatements: t.Statement[] = []
     for (const statement of node.body) {
-      transformStatement(statement, transformedStatements, defersId)
+      transformStatement(statement, transformedStatements, defersId, scope)
     }
     return t.blockStatement(transformedStatements)
   } else {
     const transformedStatements: t.Statement[] = []
-    transformStatement(node, transformedStatements, defersId)
+    transformStatement(node, transformedStatements, defersId, scope)
     return transformedStatements.length === 1
       ? transformedStatements[0]
       : t.blockStatement(transformedStatements)

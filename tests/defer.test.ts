@@ -113,6 +113,23 @@ describe('Functions', () => {
     expect(normalize(output)).toBe(normalize(expected))
   })
 
+  it('should not transform local defer functions', () => {
+    const input = `
+    function foo() {
+      const defer = () => console.log('not the defer function you are looking for')
+      defer()
+    }`
+
+    const expected = `
+    function foo() {
+      const defer = () => console.log('not the defer function you are looking for')
+      defer()
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+
   it('should handle multiple defer calls in correct reverse order', () => {
     const input = `
     function multiDefer() {
