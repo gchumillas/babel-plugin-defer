@@ -1,6 +1,6 @@
-# RESTful API with Node.js, Express and TypeScript
+# RESTful API with Node.js 20+, Express and TypeScript
 
-This project is a basic RESTful API built with Node.js, Express, and TypeScript.
+This project is a basic RESTful API built with Node.js 20+, Express, and TypeScript.
 
 ## Available Endpoints
 

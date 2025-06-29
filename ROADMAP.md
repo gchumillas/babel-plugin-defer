@@ -57,7 +57,7 @@
 - [ ] Better error messages for malformed defer calls
 
 ## 💡 Ideas for Future Consideration
-- [ ] Integration with popular frameworks (React, Vue, Node.js)
+- [ ] Integration with popular frameworks (React, Vue, Node.js 20+)
 - [ ] ESLint rules for defer usage patterns
 - [ ] Defer debugging tools and utilities
 - [ ] Performance monitoring integration
