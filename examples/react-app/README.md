@@ -1,30 +1,30 @@
 # React App
 
-Una aplicación React moderna construida con Vite y TypeScript.
+A modern React application built with Vite and TypeScript.
 
-## Características
+## Features
 
 - ⚛️ React 19
-- 🔷 TypeScript con tipado estricto
-- ⚡ Vite para desarrollo y construcción rápida
-- 🎨 ESLint configurado con reglas para React
+- 🔷 Strictly typed TypeScript
+- ⚡ Vite for fast development and build
+- 🎨 ESLint configured with React rules
 - 🔥 Hot Module Replacement (HMR)
 
-## Instalación
+## Installation
 
 ```bash
 npm install
 ```
 
-## Desarrollo
+## Development
 
 ```bash
 npm run dev
 ```
 
-Esto iniciará el servidor de desarrollo en `http://localhost:5173`
+This will start the development server at `http://localhost:5173`
 
-## Construcción
+## Build
 
 ```bash
 npm run build
@@ -33,30 +33,30 @@ npm run build
 ## Linting
 
 ```bash
-npm run lint
+npm run lint`
 ```
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 src/
-├── components/     # Componentes reutilizables
-├── types/         # Definiciones de tipos TypeScript
-├── utils/         # Funciones utilitarias
-├── App.tsx        # Componente principal
-└── main.tsx       # Punto de entrada
+├── components/     # Reusable components
+├── types/         # TypeScript type definitions
+├── utils/         # Utility functions
+├── App.tsx        # Main component
+└── main.tsx       # Entry point
 ```
 
-## Plugins de Vite
+## Vite Plugins
 
-Este proyecto utiliza:
+This project uses:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) que usa [Babel](https://babeljs.io/) para Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) que usa [SWC](https://swc.rs/) para Fast Refresh (alternativa)
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) which uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) which uses [SWC](https://swc.rs/) for Fast Refresh (alternative)
 
-## Configuración Avanzada de ESLint
+## Advanced ESLint Configuration
 
-Para aplicaciones en producción, se recomienda actualizar la configuración para habilitar reglas de lint con conocimiento de tipos:
+For production applications, it is recommended to update the configuration to enable type-aware lint rules:
 
 ```js
 export default tseslint.config([
@@ -64,26 +64,26 @@ export default tseslint.config([
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
-      // Otras configuraciones...
+      // Other configurations...
 
-      // Remover tseslint.configs.recommended y reemplazar con esto
+      // Remove tseslint.configs.recommended and replace with this
       ...tseslint.configs.recommendedTypeChecked,
-      // Alternativamente, usar esto para reglas más estrictas
+      // Alternatively, use this for stricter rules
       ...tseslint.configs.strictTypeChecked,
-      // Opcionalmente, agregar esto para reglas de estilo
+      // Optionally, add this for stylistic rules
       ...tseslint.configs.stylisticTypeChecked,
 
-      // Otras configuraciones...
+      // Other configurations...
     ],
     languageOptions: {
       parserOptions: {
         project: ['./tsconfig.node.json', './tsconfig.app.json'],
         tsconfigRootDir: import.meta.dirname,
       },
-      // otras opciones...
+      // other options...
     },
   },
 ])
 ```
 
-También puedes instalar [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) y [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) para reglas específicas de React.
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific rules.
