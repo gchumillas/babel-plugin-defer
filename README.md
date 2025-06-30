@@ -1,8 +1,5 @@
 # babel-plugin-defer
 
-> [!WARNING]
-> This library is under active development and is not stable. Do not use in production.
-
 [![npm version](https://badge.fury.io/js/babel-plugin-defer.svg)](https://badge.fury.io/js/babel-plugin-defer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -12,6 +9,18 @@ A Babel plugin that transpiles `defer` statements to JavaScript, bringing Go-lik
 ## Overview
 
 `babel-plugin-defer` is a Babel transpiler plugin that enables developers to use `defer` statements in JavaScript and TypeScript, similar to the defer mechanism found in languages like Go and V. The plugin automatically transpiles defer calls into proper JavaScript code that executes cleanup functions at the end of the current scope.
+
+```javascript
+import { defer } from 'babel-plugin-defer/runtime'
+
+function processFile(filename) {
+    const file = fs.openSync(filename)
+    defer(() => fs.closeSync(file)) // Transpiled to proper cleanup
+    
+    // Process file...
+    // file.close() will be called automatically
+}
+```
 
 ## What is `defer`?
 
@@ -48,66 +57,16 @@ fn process_file(filename string) ! {
 }
 ```
 
-**With babel-plugin-defer (JavaScript/TypeScript):**
-```javascript
-function processFile(filename) {
-    const file = fs.openSync(filename)
-    defer(() => fs.closeSync(file)) // Transpiled to proper cleanup
-    
-    // Process file...
-    // file.close() will be called automatically
-}
-```
-
 ## Installation
 
-### 1. Install the package
+Install the package and the peer dependency:
 
 ```bash
 npm install babel-plugin-defer
-```
-
-### 2. Configure Vite (React applications)
-
-Add the plugin to your `vite.config.ts`:
-
-```typescript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-export default defineConfig({
-  plugins: [
-    react({
-      babel: {
-        plugins: ["defer"] // Short form - Babel auto-discovers babel-plugin-defer
-      }
-    })
-  ],
-})
-```
-
-**Alternative explicit import:**
-```typescript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import babelPluginDefer from 'babel-plugin-defer'
-
-export default defineConfig({
-  plugins: [
-    react({
-      babel: {
-        plugins: [babelPluginDefer()]
-      }
-    })
-  ],
-})
-```
-
-### 3. Install Babel core (peer dependency)
-
-```bash
 npm install --save-dev @babel/core
 ```
+
+Visit the [examples](./examples/) folder for more examples.
 
 ## Usage
 
@@ -125,7 +84,8 @@ function example() {
 }
 ```
 
-> **Note:** When using the Babel plugin, these function calls are transpiled at build time into optimized JavaScript code. The runtime functions serve as fallbacks for environments where Babel is not configured.
+> [!NOTE]
+> When using the Babel plugin, these function calls are transpiled at build time into optimized JavaScript code. The runtime functions serve as fallbacks for environments where Babel is not configured.
 
 ## How it works
 
@@ -145,12 +105,25 @@ function processData() {
 **Output (transpiled):**
 ```javascript
 function processData() {
-  const conn = database.connect()
+  const _defers = [];
   try {
-    const data = conn.query('SELECT * FROM users')
-    return data
+    const conn = database.connect();
+    _defers.push(() => conn.close());
+
+    const file = filesystem.open('path/to/file.txt');
+    _defers.push(() => file.close());
+
+    const data = conn.query('SELECT * FROM users');
+    return data;
   } finally {
-    conn.close()
+    // Closes the resources in reverse order
+    for (let i = _defers.length - 1; i >= 0; i--) {
+      try {
+        _defers[i]();
+      } catch (e) {
+        console.log(e);
+      }
+    }
   }
 }
 ```
