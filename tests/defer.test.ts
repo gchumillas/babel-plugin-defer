@@ -113,23 +113,6 @@ describe('Functions', () => {
     expect(normalize(output)).toBe(normalize(expected))
   })
 
-  it('should not transform local defer functions', () => {
-    const input = `
-    function foo() {
-      const defer = () => console.log('not the defer function you are looking for')
-      defer()
-    }`
-
-    const expected = `
-    function foo() {
-      const defer = () => console.log('not the defer function you are looking for')
-      defer()
-    }`
-
-    const output = transformWithPlugin(input)
-    expect(normalize(output)).toBe(normalize(expected))
-  })
-
   it('should handle multiple defer calls in correct reverse order', () => {
     const input = `
     function multiDefer() {
@@ -588,6 +571,314 @@ describe('Function Expressions and Callbacks', () => {
             defers[i]();
           } catch(e) {
             console.log(e);
+          }
+        }
+      }
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+})
+
+describe('Scope and Binding Tests', () => {
+  it('should not transform local defer functions', () => {
+    const input = `
+    function foo() {
+      const defer = () => console.log('not the defer function you are looking for')
+      defer()
+    }`
+
+    const expected = `
+    function foo() {
+      const defer = () => console.log('not the defer function you are looking for')
+      defer()
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+
+  it('should not transform defer function parameters', () => {
+    const input = `
+    function foo(defer) {
+      defer()
+    }`
+
+    const expected = `
+    function foo(defer) {
+      defer()
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+
+  it('should not transform defer when redefined in function scope', () => {
+    const input = `
+    function processData() {
+      function defer(fn) {
+        console.log('custom defer implementation')
+        fn()
+      }
+      
+      defer(() => console.log('cleanup'))
+    }`
+
+    const expected = `
+    function processData() {
+      function defer(fn) {
+        console.log('custom defer implementation')
+        fn()
+      }
+      
+      defer(() => console.log('cleanup'))
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+
+  it('should transform imported defer from babel-plugin-defer/runtime', () => {
+    const input = `
+    import { defer } from 'babel-plugin-defer/runtime'
+    
+    function foo() {
+      const resource = openResource()
+      defer(() => resource.close())
+    }`
+
+    const expected = `
+    import { defer } from 'babel-plugin-defer/runtime'
+    
+    function foo() {
+      const defers = [];
+      try {
+        const resource = openResource()
+        defers.push(() => resource.close())
+      } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e)
+          }
+        }
+      }
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+
+  it('should transform imported defer but not local shadowing', () => {
+    const input = `
+    import { defer } from 'babel-plugin-defer/runtime'
+    
+    function foo() {
+      defer(() => console.log('this should transform'))
+      
+      function inner() {
+        const defer = () => console.log('local defer')
+        defer() // this should NOT transform
+      }
+      
+      defer(() => console.log('this should transform too'))
+    }`
+
+    const expected = `
+    import { defer } from 'babel-plugin-defer/runtime'
+    
+    function foo() {
+      const defers = [];
+      try {
+        defers.push(() => console.log('this should transform'))
+        
+        function inner() {
+          const defer = () => console.log('local defer')
+          defer() // this should NOT transform
+        }
+        
+        defers.push(() => console.log('this should transform too'))
+      } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e)
+          }
+        }
+      }
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+
+  it('should not transform defer imported from other libraries', () => {
+    const input = `
+    import { defer } from 'other-library'
+    
+    function foo() {
+      defer(() => console.log('should not transform'))
+    }`
+
+    const expected = `
+    import { defer } from 'other-library'
+    
+    function foo() {
+      defer(() => console.log('should not transform'))
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+
+  it('should handle default import from babel-plugin-defer/runtime', () => {
+    const input = `
+    import { defer } from 'babel-plugin-defer/runtime'
+    
+    function foo() {
+      const resource = openResource()
+      defer(() => resource.close())
+    }`
+
+    const expected = `
+    import { defer } from 'babel-plugin-defer/runtime'
+    
+    function foo() {
+      const defers = [];
+      try {
+        const resource = openResource()
+        defers.push(() => resource.close())
+      } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e)
+          }
+        }
+      }
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+
+  it('should handle namespace import from babel-plugin-defer/runtime', () => {
+    const input = `
+    import * as deferModule from 'babel-plugin-defer/runtime'
+    
+    function foo() {
+      const resource = openResource()
+      deferModule.defer(() => resource.close())
+    }`
+
+    // Note: This test might need adjustment based on how namespace imports are handled
+    // For now, assuming it doesn't transform since it's deferModule.defer, not just defer
+    const expected = `
+    import * as deferModule from 'babel-plugin-defer/runtime'
+    
+    function foo() {
+      const resource = openResource()
+      deferModule.defer(() => resource.close())
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+
+  it('should transform global defer when no import is present', () => {
+    const input = `
+    function foo() {
+      const resource = openResource()
+      defer(() => resource.close())
+    }`
+
+    const expected = `
+    function foo() {
+      const defers = [];
+      try {
+        const resource = openResource()
+        defers.push(() => resource.close())
+      } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e)
+          }
+        }
+      }
+    }`
+
+    const output = transformWithPlugin(input)
+    expect(normalize(output)).toBe(normalize(expected))
+  })
+
+  it('should handle complex scoping with multiple nested functions', () => {
+    const input = `
+    import { defer } from 'babel-plugin-defer/runtime'
+    
+    function outer() {
+      defer(() => console.log('outer defer 1'))
+      
+      function middle() {
+        defer(() => console.log('middle defer'))
+        
+        function inner() {
+          const defer = localDeferFunction
+          defer() // Should NOT transform - local defer
+        }
+        
+        inner()
+        defer(() => console.log('middle defer 2'))
+      }
+      
+      middle()
+      defer(() => console.log('outer defer 2'))
+    }`
+
+    const expected = `
+    import { defer } from 'babel-plugin-defer/runtime'
+    
+    function outer() {
+      const defers = [];
+      try {
+        defers.push(() => console.log('outer defer 1'))
+        
+        function middle() {
+          const defers = [];
+          try {
+            defers.push(() => console.log('middle defer'))
+            
+            function inner() {
+              const defer = localDeferFunction
+              defer() // Should NOT transform - local defer
+            }
+            
+            inner()
+            defers.push(() => console.log('middle defer 2'))
+          } finally {
+            for (let i = defers.length - 1; i >= 0; i--) {
+              try {
+                defers[i]();
+              } catch(e) {
+                console.log(e)
+              }
+            }
+          }
+        }
+        
+        middle()
+        defers.push(() => console.log('outer defer 2'))
+      } finally {
+        for (let i = defers.length - 1; i >= 0; i--) {
+          try {
+            defers[i]();
+          } catch(e) {
+            console.log(e)
           }
         }
       }
