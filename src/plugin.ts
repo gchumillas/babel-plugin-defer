@@ -172,16 +172,21 @@ function isImportedFromBabelPluginDefer(identifier: t.Identifier, scope: Scope):
   const bindingPath = binding.path
 
   // Check if it is an ImportSpecifier, ImportDefaultSpecifier, or ImportNamespaceSpecifier
-  if (
-    t.isImportSpecifier(bindingPath.node) ||
-    t.isImportDefaultSpecifier(bindingPath.node) ||
-    t.isImportNamespaceSpecifier(bindingPath.node)
-  ) {
+  if (t.isImportSpecifier(bindingPath.node)) {
     const importDeclaration = bindingPath.parent
     
     if (t.isImportDeclaration(importDeclaration)) {
       const source = importDeclaration.source.value
-      return source === 'babel-plugin-defer/runtime' || source.endsWith('/runtime')
+
+      if (source === 'babel-plugin-defer/runtime') {
+        const importedName = bindingPath.node.imported
+        
+        if (t.isIdentifier(importedName)) {
+          return importedName.name === 'defer'
+        } else if (t.isStringLiteral(importedName)) {
+          return importedName.value === 'defer'
+        }
+      }
     }
   }
 
