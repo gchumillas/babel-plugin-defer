@@ -95,7 +95,10 @@ The plugin transforms defer statements during the build process:
 ```javascript
 function processData() {
   const conn = database.connect()
-  defer(() => conn.close())
+  defer(() => conn.close()) // or simply defer(conn.close)
+
+  const file = filesystem.open('path/to/file.txt')
+  defer(() => file.close()) // or simply defer(file.close)
   
   const data = conn.query('SELECT * FROM users')
   return data
