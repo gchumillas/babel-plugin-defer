@@ -24,7 +24,7 @@ export function createTranspilerPlugin(): PluginObj {
       ArrowFunctionExpression(path: NodePath<t.ArrowFunctionExpression>) {
         const { node } = path
 
-        // Solo transformar si el cuerpo es un BlockStatement y contiene defer calls
+        // Only transform if the body is a BlockStatement and contains defer calls
         if (!t.isBlockStatement(node.body) || !hasDeferCall(node.body, path.scope)) {
           return
         }
@@ -46,7 +46,7 @@ export function createTranspilerPlugin(): PluginObj {
   }
 }
 
-// Función común para transformar cualquier tipo de función que contenga defer
+// Common function to transform any type of function that contains defer
 function transformFunctionWithDefer(body: t.BlockStatement, scope: Scope): void {
   // Generate a unique identifier for defers
   const defersId = scope.generateUidIdentifier('defers')
@@ -131,7 +131,6 @@ function transformFunctionWithDefer(body: t.BlockStatement, scope: Scope): void 
 }
 
 // Helper: check if a function body contains any defer() calls
-// Now takes scope to verify that 'defer' refers to the global defer function
 function hasDeferCall(body: t.BlockStatement, scope: Scope): boolean {
   let found = false
   t.traverseFast(body, (node) => {
@@ -139,7 +138,7 @@ function hasDeferCall(body: t.BlockStatement, scope: Scope): boolean {
       t.isCallExpression(node) &&
       t.isIdentifier(node.callee) &&
       node.callee.name === 'defer' &&
-      isGlobalDefer(node.callee, scope)
+      (!isAlreadyDefined(node.callee, scope) || isImportedFromBabelPluginDefer(node.callee, scope))
     ) {
       found = true
     }
@@ -147,22 +146,46 @@ function hasDeferCall(body: t.BlockStatement, scope: Scope): boolean {
   return found
 }
 
-// Helper function to check if an identifier refers to the global 'defer' function
-function isGlobalDefer(identifier: t.Identifier, scope: Scope): boolean {
+// Helper: check if an identifier is already defined in any scope
+function isAlreadyDefined(identifier: t.Identifier, scope: Scope): boolean {
   if (identifier.name !== 'defer') {
     return false
   }
 
-  // Check if 'defer' is defined in any local scope
-  let currentScope: Scope | null = scope
-  while (currentScope) {
-    if (currentScope.hasOwnBinding('defer')) {
-      return false
-    }
-    currentScope = currentScope.parent
+  // Check if there is a binding for 'defer'
+  const binding = scope.getBinding('defer')
+  return binding !== undefined
+}
+
+// Helper: check if an identifier is imported from babel-plugin-defer
+function isImportedFromBabelPluginDefer(identifier: t.Identifier, scope: Scope): boolean {
+  if (identifier.name !== 'defer') {
+    return false
   }
 
-  return true
+  const binding = scope.getBinding('defer')
+  
+  if (!binding || binding.kind !== 'module') {
+    return false
+  }
+
+  const bindingPath = binding.path
+
+  // Check if it is an ImportSpecifier, ImportDefaultSpecifier, or ImportNamespaceSpecifier
+  if (
+    t.isImportSpecifier(bindingPath.node) ||
+    t.isImportDefaultSpecifier(bindingPath.node) ||
+    t.isImportNamespaceSpecifier(bindingPath.node)
+  ) {
+    const importDeclaration = bindingPath.parent
+    
+    if (t.isImportDeclaration(importDeclaration)) {
+      const source = importDeclaration.source.value
+      return source === 'babel-plugin-defer/runtime' || source.endsWith('/runtime')
+    }
+  }
+
+  return false
 }
 
 // Helper function to recursively transform statements
@@ -170,12 +193,12 @@ function transformStatement(statement: t.Statement, result: t.Statement[], defer
   if (t.isExpressionStatement(statement)) {
     const expr = statement.expression
 
-    // If it is a defer() call, transform it - but only if it's the global defer
+    // If it is a defer() call, transform it - using the same logic as hasDeferCall
     if (
       t.isCallExpression(expr) &&
       t.isIdentifier(expr.callee) &&
       expr.callee.name === 'defer' &&
-      isGlobalDefer(expr.callee, scope)
+      (!isAlreadyDefined(expr.callee, scope) || isImportedFromBabelPluginDefer(expr.callee, scope))
     ) {
       // Convert defer(fn) to defers.push(fn)
       const pushCall = t.expressionStatement(
