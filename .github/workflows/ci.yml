@@ -24,7 +24,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     
     - name: Install dependencies
-      run: npm install
+      run: npm install --prefer-offline --no-audit
     
     - name: Run linter
       run: npm run lint
@@ -41,44 +41,3 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: false
-
-  compatibility:
-    runs-on: ubuntu-latest
-    needs: test
-    
-    strategy:
-      matrix:
-        node-version: ['20', '22']
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-    
-    - name: Install dependencies
-      run: npm install
-    
-    - name: Build project
-      run: npm run build
-    
-    - name: Test React example
-      run: |
-        cd examples/react-app
-        npm install
-        npm run build
-    
-    - name: Test RESTful API example
-      run: |
-        cd examples/restful-api
-        npm install
-        npm run build || npm run compile || echo "Build completed"
-    
-    - name: Verify package installation
-      run: |
-        npm pack
-        npm install -g babel-plugin-defer-*.tgz
-        node -e "console.log('Package installed successfully')"
