@@ -13,13 +13,13 @@
     "cleanup",
     "resource-management"
   ],
-  "homepage": "https://github.com/your-username/babel-plugin-defer#readme",
+  "homepage": "https://github.com/gchumillas/babel-plugin-defer#readme",
   "bugs": {
-    "url": "https://github.com/your-username/babel-plugin-defer/issues"
+    "url": "https://github.com/gchumillas/babel-plugin-defer/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-username/babel-plugin-defer.git"
+    "url": "git+https://github.com/gchumillas/babel-plugin-defer.git"
   },
   "license": "MIT",
   "author": {
@@ -90,6 +90,6 @@
   "dependencies": {},
   "funding": {
     "type": "github",
-    "url": "https://github.com/sponsors/your-username"
+    "url": "https://github.com/sponsors/gchumillas"
   }
 }
