@@ -66,7 +66,7 @@ npm install babel-plugin-defer
 npm install --save-dev @babel/core
 ```
 
-Visit the [examples](./examples/) folder for more examples.
+Visit the [examples](./examples/) folder to see the plugin in action.
 
 ## Usage
 
